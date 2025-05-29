@@ -1,4 +1,4 @@
-# DoblaWeb - Plataforma Web Corporativa para Doblacero y Laminados Tihuatlán
+# DoblaWeb - Desarrollo e implementación de un sitio web para promoción de productos
 
 <div align="center">
   <img src="assets/logo-empresa.png" alt="Logo Doblacero y Laminados" width="200">
@@ -37,6 +37,9 @@ El desarrollo se realizará bajo la metodología ágil Scrum, que permitirá org
  
 ### Objetivo General  
 Digitalizar los servicios de la empresa mediante una plataforma web que mejore la experiencia del cliente y optimice sus procesos comerciales.  
+
+---
+
 
 ### Objetivos Específicos  
 1. Implementar un catálogo dinámico
