@@ -1,9 +1,9 @@
 # DoblaWeb - Desarrollo e implementación de un sitio web para promoción de productos
 
-<div align="center">
-  <img src="assets/logo-empresa.png" alt="Logo Doblacero y Laminados" width="200">
-  <img src="assets/logo-doblaweb.png" alt="Logo DoblaWeb" width="200">
-</div>
+|  Logo de Empresa | Logo del Producto |
+| :------------: | :------------: | 
+| <img src="Frontend/Assets/Logo_Empresa.jpeg" width="150">| <img src="FrontEnd/Assets/Icons/Combination Mark.png"  width="160">  | 
+
 
 ---
 
@@ -45,24 +45,22 @@ Digitalizar los servicios de la empresa mediante una plataforma web que mejore l
 1. Implementar un catálogo dinámico
 2. Garantizar la usabilidad en cualquier tipo de dispositivo
 3. Integrar herramientas de contacto directo con la empresa
-4. Optimizar el rendimiento del sitio web para tiempos de carga rápidos
-5. Integrar contenido multimedia como el uso de imágenes 
-6. Diseñar una interfaz intuitiva y atractiva para una mejor UX
+4. Optimizar el rendimiento del sitio web para menos tiempos de carga
+5. Implementar contenido multimedia como es el uso de imágenes y videos
+6. Diseñar una interfaz intuitiva y atractiva para una mejor Experiencia de Usuario (UX)
 
 
 ---
 
 ## Identidad Gráfica  
 ### Paleta de Colores  
-![Wireframe](docs/wireframe.png) 
+ <img src="/FrontEnd/Assets/Paleta_Oficial.png
+ " width="200">
 
 ### Estructura del Sitio  
-![Wireframe](docs/wireframe.png)  
+<img src="/FrontEnd/Assets/DoblaWeb_SiteMap.png
+ " width="200"> 
 
----
-## Organigrama del Proyecto
-![Organigrama](docs/organigrama.png)  
-*Estructura organizacional simplificada para este proyecto individual*
 
 ---
 
@@ -71,10 +69,10 @@ Digitalizar los servicios de la empresa mediante una plataforma web que mejore l
 
 ---
 ### Lista De Tecnologías
-- **Aplicacion:** 
-![Visual Studio](https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual%20studio&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
+
+- **Servidor:** ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=61DAFB) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)  ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white) 
+- **Pruebas:** ![Google Chrome](https://img.shields.io/badge/Google%20Chrome-4285F4?style=for-the-badge&logo=GoogleChrome&logoColor=white) ![Edge](https://img.shields.io/badge/Microsoft_Edge-0078D7?style=for-the-badge&logo=microsoft-edge&logoColor=white)
+
+- **Cliente:** ![Visual Studio](https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual%20studio&logoColor=white)   ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 - **Documentación:** ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)
-- **Servidor:** ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=61DAFB) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)  ![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white)
  
