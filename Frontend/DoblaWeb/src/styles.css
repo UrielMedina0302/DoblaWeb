@@ -1,0 +1,70 @@
+html, body, app-root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ Altura proporcional (pantallas grandes) */
+app-header {
+background-color: springgreen;
+  height: 15%;
+  width: 100%;
+}
+
+app-body {
+    background-color: lightblue;
+  height: 65%;
+  width: 100%;
+  overflow-y: auto;
+}
+
+app-footer {
+    background-color: lightcoral;
+  height: 20%;
+  width: 100%;
+}
+
+/* ✅ Centrado de contenido si se desea */
+app-header, app-body, app-footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+}
+
+/* ✅ Responsivo: pantallas pequeñas (menos de 700px alto o 600px ancho) */
+@media (max-width: 600px), (max-height: 700px) {
+  app-header,
+  app-body,
+  app-footer {
+    height: auto;
+    padding: 0.5rem;
+  }
+
+  /* app-root {
+    height: auto;
+  } */
+
+  body {
+    height: auto;
+  }
+
+  app-body {
+    flex: 1;
+  }
+}
