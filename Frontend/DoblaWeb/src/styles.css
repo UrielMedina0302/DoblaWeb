@@ -3,8 +3,7 @@ html, body, app-root {
   padding: 0;
   height: 100%;
   width: 100%;
-  box-sizing: border-box;
-}
+  }
 
 body {
   display: flex;
@@ -21,22 +20,22 @@ app-root {
 
 /* ✅ Altura proporcional (pantallas grandes) */
 app-header {
-background-color: springgreen;
+background-color: #1c4aa6;
   height: 15%;
   width: 100%;
 }
 
 app-body {
-    background-color: lightblue;
-  height: 65%;
-  width: 100%;
-  overflow-y: auto;
+background-color: #f2f2f2;
+height: 65%;
+width: 100%;
+overflow-y: auto;
 }
 
 app-footer {
-    background-color: lightcoral;
-  height: 20%;
-  width: 100%;
+background-color: #f21d2f;
+height: 20%;
+width: 100%;
 }
 
 /* ✅ Centrado de contenido si se desea */
