@@ -1,21 +1,42 @@
 .simple-header {
   width: 100%;
-  background-color: #2c3e50;
-  color: #ecf0f1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 30px;
   min-height: 70px;
   box-sizing: border-box;
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  border-top: 2px solid #f21d2f; /* Igual que el footer */
+  overflow: hidden;
 }
 
+/* Contenedor de perfil */
+.profile-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.profile-container img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ecf0f1;
+  border: 2px solid #e74c3c;
+  display: block;
+}
+
+/* Logo */
 .logo-container img {
   height: 50px;
   width: auto;
   display: block;
 }
 
+/* Navegación */
 .simple-nav {
   list-style: none;
   display: flex;
@@ -46,9 +67,14 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 10px 15px;
+    gap: 0.5rem;
   }
   .logo-container img {
     height: 40px;
+  }
+  .profile-container {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
   }
   .simple-nav {
     flex-direction: column;

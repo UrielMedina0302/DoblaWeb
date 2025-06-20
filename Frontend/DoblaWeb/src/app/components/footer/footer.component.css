@@ -1,21 +1,21 @@
-/* Estilos generales del footer - SIN MODIFICAR */
+/* Estilos generales del footer - MODIFICADO SOLO LA ALTURA */
 .footer {
   background-color: #2c3e50;
   color: #ecf0f1;
-  height: 20vh; /* 20% del viewport height */
-  min-height: 150px; /* Altura mínima para que no se vea muy comprimido */
-  max-height: 200px; /* Altura máxima para pantallas grandes */
+  height: 15vh; /* CAMBIADO de 20vh a 15vh */
+  min-height: 120px; /* Ajustado para 15% */
+  max-height: 180px; /* Ajustado para 15% */
   display: flex;
   align-items: center;
-  border-top: 1px solid #e74c3c;
+  border-top: 1px solid  #f21d2f;
   box-sizing: border-box;
-  overflow: hidden; /* Evita desbordamiento */
+  overflow: hidden;
 }
 
 .footer-contenido {
   width: 100%;
   max-width: 1200px;
-  padding: 0 20px;
+  padding: 0 15px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
@@ -39,7 +39,7 @@
 }
 
 .footer-img {
-  max-height: 40px; /* Más pequeño que antes */
+  max-height: 40px;
   width: auto;
   object-fit: contain;
   filter: brightness(0) invert(1);
@@ -58,8 +58,8 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 15px;
-  height: calc(100% - 15px); /* Compensación para alineación */
+  padding-top: 10px;
+  height: calc(100% - 15px);
 }
 
 /* Alineación perfecta de títulos */
@@ -98,7 +98,7 @@
   margin-bottom: 6px;
 }
 
-/* Estilos base para todas las secciones (sin afectar otras) */
+/* Estilos base para todas las secciones */
 .footer-seccion {
   padding: 0 0.5rem;
   height: 100%;
@@ -157,7 +157,6 @@
     padding: 0.3rem 0;
   }
   
-  /* Ajuste responsive para las secciones alineadas */
   .footer-seccion:nth-child(2),
   .footer-seccion:nth-child(3),
   .footer-seccion:nth-child(4) {

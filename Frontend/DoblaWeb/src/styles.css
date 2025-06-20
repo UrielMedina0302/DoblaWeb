@@ -32,12 +32,12 @@ app-body {
   flex: 1; /* Ocupa todo el espacio restante */
   width: 100%;
   overflow-y: auto; /* Scroll si el contenido excede */
-  min-height: 0; /* Necesario para flex en algunos navegadores */
+  min-height: 63%; /* Necesario para flex en algunos navegadores */
 }
 
 app-footer {
   background-color: #f21d2f;
-  min-height: 20%; /* Altura mínima en porcentaje */
+  min-height: 15%; /* Altura mínima en porcentaje */
   width: 100%;
   flex-shrink: 0; /* Evita que se encoja */
 }
