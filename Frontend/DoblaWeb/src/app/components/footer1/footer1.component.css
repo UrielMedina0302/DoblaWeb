@@ -1,0 +1,136 @@
+/* Estilos generales del footer - Versión ajustada al 12% */
+.footer {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  height: 12vh;                  /* 12% del viewport */
+  min-height: 120px;             /* Mínimo para contenido */
+  max-height: 180px;             /* Máximo para pantallas grandes */
+  display: flex;
+  justify-content: center;       /* Centrado horizontal */
+  align-items: center;           /* Centrado vertical */
+  width: 100%;
+  border: 8px solid #f21d2f;
+  box-sizing: border-box;
+  overflow: hidden;              /* Contenido recortado si excede */
+  padding: 0;                   /* Reset de padding */
+}
+
+/* Contenedor principal (ajustado al 12%) */
+.footer-contenido {
+  width: 100%;
+  max-width: 1200px;
+  height: calc(100% - 16px);    /* Ajuste para altura exacta */
+  padding: 8px 20px;           /* Padding interno reducido */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.6rem;                  /* Espacio entre elementos reducido */
+  align-items: center;          /* Centrado vertical */
+  overflow: auto;               /* Scroll interno si es necesario */
+}
+
+/* Sección de imágenes ultracompacta */
+.seccion-imagenes {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;                  /* Espacio mínimo */
+  padding: 2px 0;               /* Padding casi eliminado */
+}
+
+.footer-imagenes {
+  display: flex;
+  gap: 0.2rem;                  /* Espacio mínimo entre imágenes */
+}
+
+.footer-img {
+  max-height: 30px;             /* Más pequeño que antes */
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+/* Texto supercompacto */
+.footer-copyright {
+  font-size: 0.6rem;           /* Reducción adicional */
+  opacity: 0.8;
+  margin-top: 0.1rem;
+}
+
+/* Secciones de contenido ultracompactas */
+.footer-seccion {
+  padding: 0 0.2rem;            /* Padding horizontal mínimo */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;  /* Contenido pegado arriba */
+  overflow: hidden;             /* Evita desbordamiento */
+}
+
+.footer-seccion h3 {
+  color: #e74c3c;
+  margin: 0 0 4px 0;            /* Margen inferior reducido */
+  font-size: 0.8rem;            /* Tamaño reducido */
+  white-space: nowrap;
+  position: relative;
+  padding-bottom: 2px;          /* Reducción del subrayado */
+}
+
+.footer-seccion h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 25px;                  /* Subrayado más corto */
+  height: 1px;                  /* Línea más fina */
+  background-color: #e74c3c;
+}
+
+.footer-seccion ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.65rem;           /* Reducción adicional */
+}
+
+.footer-seccion li {
+  margin-bottom: 0.15rem;       /* Espacio mínimo entre items */
+  line-height: 1.1;             /* Interlineado compacto */
+}
+
+.footer-seccion a {
+  color: #ecf0f1;
+  text-decoration: none;
+  font-size: 0.65rem;           /* Tamaño reducido */
+}
+
+.footer-seccion p {
+  margin-bottom: 0.15rem;
+  font-size: 0.6rem;           /* Texto más pequeño */
+  line-height: 1.1;
+}
+
+/* Responsive Design - Ajustes extremos */
+@media (max-width: 768px) {
+  .footer {
+    height: auto;               /* Altura flexible */
+    min-height: 100px;          /* Mínimo móvil */
+    padding: 6px 0;             /* Padding reducido */
+  }
+  
+  .footer-contenido {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+    padding: 0 8px;            /* Padding lateral mínimo */
+    height: auto;
+  }
+  
+  .footer-seccion {
+    padding: 1px 0;             /* Casi sin padding */
+  }
+  
+  .footer-img {
+    max-height: 25px;           /* Más pequeño en móviles */
+  }
+}

@@ -22,11 +22,16 @@ app-root {
 /* Componentes principales */
 app-header {
   background-color: #1c4aa6;
-  min-height: 15%; /* Altura mínima en porcentaje */
+  min-height: 10%; /* Altura mínima en porcentaje */
   width: 100%;
   flex-shrink: 0; /* Evita que se encoja */
 }
-
+/*app-header-admin{*/
+  /* background-color: #1c4aa6; */
+ /* min-height: 10%; /* Altura mínima en porcentaje */
+  /*width: 100%;
+  flex-shrink: 0; /* Evita que se encoja 
+}*/
 app-body {
   background-color: #f2f2f2;
   flex: 1; /* Ocupa todo el espacio restante */
@@ -35,12 +40,12 @@ app-body {
   min-height: 63%; /* Necesario para flex en algunos navegadores */
 }
 
-app-footer {
-  background-color: #f21d2f;
-  min-height: 15%; /* Altura mínima en porcentaje */
-  width: 100%;
-  flex-shrink: 0; /* Evita que se encoja */
-}
+/*app-footer {
+  /* background-color: #f21d2f; */
+  /*min-height: 15%; /* Altura mínima en porcentaje */
+  /*width: 100vw;*/
+  /*flex-shrink: 0; /* Evita que se encoja */
+/*}*/
 
 /* Estilos comunes para los componentes */
 app-header, app-body, app-footer {
