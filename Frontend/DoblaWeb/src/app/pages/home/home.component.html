@@ -1,1 +1,15 @@
-<p>home works!</p>
+<!-- Modal que aparece al inicio -->
+<div *ngIf="mostrarModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-content">
+      <h2>Título importante</h2>
+      <p>Este mensaje aparece al cargar la página.</p>
+      <button (click)="cerrarModal()">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resto del contenido normal de tu página -->
+<div *ngIf="!mostrarModal">
+  <!-- Tu contenido normal aquí -->
+</div>
