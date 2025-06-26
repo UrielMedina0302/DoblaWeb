@@ -2,7 +2,7 @@
 
 |  Logo de Empresa | Logo del Producto |
 | :------------: | :------------: | 
-| <img src="Frontend/Assets/Logo_Empresa.jpeg" width="150">| <img src="FrontEnd/Assets/Icons/Combination Mark.png"  width="160">  | 
+| <img src="Frontend/DoblaWeb/src/assets/Logo_Empresa.jpeg" width="150">| <img src="Frontend/DoblaWeb/src/assets/Logo_pagina1.png"  width="160">  | 
 
 
 ---
