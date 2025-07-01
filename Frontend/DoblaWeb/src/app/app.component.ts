@@ -4,6 +4,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { BodyComponent } from './components/body/body.component';
 import { HeaderAdminComponent } from './components/header-admin/header-admin.component';
 import { Footer1Component } from './components/footer1/footer1.component';
+import { AuthComponent } from './service/auth/auth.component';
 
 @Component({
   selector: 'app-root',
@@ -13,4 +14,7 @@ import { Footer1Component } from './components/footer1/footer1.component';
 })
 export class AppComponent {
   title = 'DoblaWeb';
+  isLoggedIn(): boolean {
+    return localStorage.getItem('auth') === 'true';
+  }
 }
