@@ -1,0 +1,110 @@
+/* Estilo MINIMALISTA */
+.simple-header {
+  background-color: #2c3e50;
+  height: 10vh;
+  min-height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border: 2px solid #1c4aa6
+}
+
+/* Logo simplificado */
+.logo-container img {
+  height: 40px;
+  width: auto;
+  transition: opacity 0.2s;
+}
+
+.logo-container img:hover {
+  opacity: 0.9;
+}
+
+/* Menú de navegación minimalista */
+.simple-header nav {
+  display: flex;
+  gap: 0.8rem;
+  position: absolute;
+  right: 20px;
+}
+
+/* Estilos base para botones */
+.simple-header nav div {
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+/* Botón Iniciar Sesión */
+.simple-header nav div.login-btn {
+  color: #ecf0f1;
+  border: 1px solid rgba(236, 240, 241, 0.5);
+  background-color: transparent;
+}
+
+/* Botón Registro */
+.simple-header nav div.register-btn {
+  background-color: #1c4aa6;
+  color: white;
+  
+}
+
+/* Efectos hover */
+.simple-header nav div.login-btn:hover {
+  background-color: rgba(236, 240, 241, 0.1);
+  border-color: #ecf0f1;
+}
+
+.simple-header nav div.register-btn:hover {
+  background-color: rgba(236, 240, 241, 0.1);
+  border-color: #ecf0f1;
+  transform: translateY(-1px);
+}
+
+/* Efecto activo */
+.simple-header nav div:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .simple-header {
+    height: auto;
+    padding: 15px;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .logo-container {
+    margin-bottom: 10px;
+  }
+
+  .simple-header nav {
+    position: static;
+    gap: 0.8rem;
+    margin-top: 10px;
+  }
+
+  .simple-header nav div {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .simple-header nav {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .simple-header nav div {
+    width: 100%;
+    text-align: center;
+  }
+}

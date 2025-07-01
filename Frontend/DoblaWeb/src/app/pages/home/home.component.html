@@ -1,1 +1,32 @@
-<p>home works!</p>
+<!-- Modal que aparece al inicio -->
+<div *ngIf="mostrarModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-content">
+      
+      <p>La página DoblaWeb es la única página oficial de Doblaceros y Laminados Tihuatlan diseñada para</p>
+      <ul>
+        <li>Brindar información sobre la empresa</li>
+        <li>Mostrar nuestros productos</li>
+        <li>Proporcionar datos de contacto actualizados y verificados</li>
+        </ul>
+        <h4>Aviso importante:</h4>
+        <p>Este sitio exclusivamente informativo. No realizamos:</p>
+        <ul>
+          <li>Ventas en línea</li>
+          <li>Compras en línea</li>
+        </ul>
+      <button (click)="cerrarModal()" class="close-button">x</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resto del contenido normal de tu página -->
+<div *ngIf="!mostrarModal">
+   <div class="content-wrapper">
+    <img src="assets/logo.png" alt="Logo DoblaWeb" class="centered-image">
+    <div class="auth-buttons">
+      <button class="auth-button register-button">Registrar</button>
+      <button class="auth-button login-button">Iniciar Sesión</button>
+    </div>
+  </div>
+</div>

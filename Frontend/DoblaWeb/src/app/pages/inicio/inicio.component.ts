@@ -1,10 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-inicio',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './inicio.component.html',
-  styleUrl: './inicio.component.css'
+  styleUrls: ['./inicio.component.css']
 })
 export class InicioComponent implements OnInit {
  showModal = true;//Muestra el modal de bienvenida al entrar a la pagina
