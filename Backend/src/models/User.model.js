@@ -25,9 +25,11 @@ const userSchema = new moongose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
-    }},
-    {
-    timestamps: true // Agrega campos createdAt y updatedAt automáticamente
+    }
+    },{
+        versionKey: false,// Desactiva el campo __v de Mongoose
+        timestamps: true // Agrega campos createdAt y updatedAt automáticamente
+    
     });
 
     //Método para comparar contraseñas

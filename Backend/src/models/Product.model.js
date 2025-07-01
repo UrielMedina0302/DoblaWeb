@@ -14,12 +14,12 @@ const productSchema = new mongoose.Schema({
     isActive:{
         type: Boolean,
         default: true // Por defecto, el producto está activo
-    },
-    updateAt: {//Campo para la fecha de actualización
-        type: Date,
-        default: Date.now // Por defecto, la fecha de actualización es la fecha actual
-    },
-
+    }
+    },{
+        versionKey: false,// Desactiva el campo __v de Mongoose
+        timestamps: true // Agrega campos createdAt y updatedAt automáticamente
+    
     });
+
 // Exportar el modelo de producto para poder usarlo en otras partes de la aplicación
 module.exports = mongoose.model('Product', productSchema); //El modelo de producto se define con  
