@@ -4,38 +4,43 @@ exports.createProduct = async (productData) => {// Esta función recibe los dato
 
     try{
     return await Product.create(productData);
+     res.status(201).json({ success:true, data:req.body, message: "Producto creado correctamente" }); // Respuesta exitosa al crear el producto
     } catch (error) {
         console.error("Error al subir el producto", error.message);
         throw error; // Propagar el error para manejarlo en el controlador
     }
 };
 
-exports.getProductById = async (productId) => {// Esta función recibe el ID del producto y lo busca en la base de datos
+exports.getProductById = async (id) => {// Esta función recibe el ID del producto y lo busca en la base de datos
     try {
-        return await Product.findById(productId).populate('createdBy','email'); // Utiliza populate para obtener el email del usuario que creó el producto
-    } catch (error) {
+        return await Product.findById(id)
+    } 
+    catch (error) {
         console.error("Error al obtener el producto por ID",  error.message);
     }
 };
 exports.getAllProducts = async () => {// Esta función obtiene todos los productos de la base de datos
     try {
-        return await Product.find().populate('createdBy','email'); // Utiliza populate para obtener el email del usuario que creó el producto
+        return await Product.find()
     } catch (error) {
         console.error("Error al obtener todos los productos", error.message);
     }
 };
-exports.updateProduct = async (productId, productData) => {// Esta función recibe el ID del producto y los nuevos datos del producto y lo actualiza en la base de datos
+exports.updateProduct = async (id, productData) => {// Esta función recibe el ID del producto y los nuevos datos del producto y lo actualiza en la base de datos
     try {
-        return await Product.findByIdAndUpdate(productId, productData, { new: true });
+        return await Product.findByIdAndUpdate(id, productData, { new: true, runValidators: true })//.populate('createdBy','email'); // Utiliza populate para obtener el email del usuario que creó el producto
+        // El parámetro { new: true } devuelve el documento actualizado
+        // El parámetro { runValidators: true } asegura que se apliquen las validaciones del esquema al actualizar el producto
+        
     } catch (error) {
         console.error("Error al actualizar el producto", error.message);
         throw error; // Propagar el error para manejarlo en el controlador
     }
 };
 
-exports.deleteProduct = async (productId) => {// Esta función recibe el ID del producto y lo elimina de la base de datos
+exports.deleteProduct = async (id) => {// Esta función recibe el ID del producto y lo elimina de la base de datos
     try {
-        return await Product.findByIdAndDelete(productId);
+        return await Product.findByIdAndDelete(id);
     } catch (error) {
         console.error("Error al eliminar el producto", error.message);
         throw error; // Propagar el error para manejarlo en el controlador

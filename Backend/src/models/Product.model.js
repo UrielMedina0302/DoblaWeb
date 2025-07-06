@@ -2,9 +2,14 @@ const mongoose = require('mongoose'); //Se importa moongose para poder trabajar 
 const {Schema} = mongoose; //Se importa el esquema de mongoose para poder definir el modelo de producto
 
 const productSchema = new mongoose.Schema({
-    _id:{
-        type: mongoose.Schema.Types.ObjectId, // Tipo de dato ObjectId para el ID del producto
-        auto: true // Genera automáticamente un ID único para cada producto
+    // productId:{
+    //     type:Number,
+    //     required: true, // Este campo es obligatorio
+    // },
+    name: {
+        type: String,
+        required: true, // Este campo es obligatorio
+        trim: true // Elimina espacios en blanco al inicio y al final
     },
     description: {
         type: String,
