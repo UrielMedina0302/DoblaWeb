@@ -2,12 +2,12 @@ const mongoose = require('mongoose'); //Se importa mongoose para poder trabajar 
 const {Schema} = mongoose; //Se importa el esquema de mongoose para poder definir el modelo de usuario
 const bcrypt = require('bcryptjs'); //Se importa bcryptjs para poder encriptar las contraseñas de los usuarios 
 
-const userSchema = new moongose.Schema({
+const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
         unique: true,
-        trim: true
+        trim: true 
     },
     email: {
         type: String,
