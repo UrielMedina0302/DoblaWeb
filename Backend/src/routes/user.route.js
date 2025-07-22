@@ -1,12 +1,13 @@
-const express = require ('express');
+const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/user.controller.js');
+const userController = require('../controllers/user.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
-//Rutas para poder manerjar usuarios
-router.post('/insert', userController.createUser); // Ruta para crear un nuevo usuario
-router.get('/getAll', userController.getAllUsers); // Ruta para obtener todos los usuarios
-router.get('/getOne/:user_id', userController.getUserById); // Ruta para obtener un usuario por ID
-router.post('/updateOne/:user_id', userController.updateUser); // Ruta para actualizar un usuario por ID
-router.post('/deleteOne/:user_id', userController.deleteUser); // Ruta para eliminar un usuario por ID
-module.exports = router; // Exportar el router para usarlo en la aplicación principal
+// Rutas CRUD usando solo GET/POST
+router.post('/users/create', authMiddleware.authenticate, userController.createUser);
+router.post('/users/update', authMiddleware.authenticate, userController.updateUser);
+router.get('/users/list', authMiddleware.authenticate, userController.getAllUsers);
+router.get('/users/:id', authMiddleware.authenticate, userController.getUserById);
+router.post('/users/delete', authMiddleware.authenticate, userController.deleteUser);
 
+module.exports = router;
