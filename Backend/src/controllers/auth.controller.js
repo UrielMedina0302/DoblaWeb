@@ -126,8 +126,11 @@ exports.forgotPassword = async (req, res, next) => {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
+    console.log('🔑 Token de reset generado:', resetToken);
+    console.log('🔗 Enlace de prueba:', `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`);
+
     // URL de reset (temporalmente al backend)
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
+    const resetURL = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
 
     try {
       // Envío de email mejorado
@@ -157,53 +160,81 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { token, password } = req.body;
+    // 1. Obtener token de los parámetros de la URL
+    const { token } = req.params;
+     console.log('🔍 Token recibido para reset:', token); // Mostrar token recibido
+    const { password, passwordConfirm } = req.body;
 
-    // Validación mejorada
+    // 2. Validaciones
     if (!token) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         status: 'error',
-        message: 'Token de recuperación es requerido' 
+        message: 'Token no proporcionado en la URL'
       });
     }
 
-    if (!password || password.length < 8) {
-      return res.status(400).json({ 
+    if (!password || !passwordConfirm) {
+      return res.status(400).json({
         status: 'error',
-        message: 'La contraseña debe tener al menos 8 caracteres' 
+        message: 'Provea contraseña y confirmación'
       });
     }
 
-    // Hash del token
+    if (password !== passwordConfirm) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Las contraseñas no coinciden'
+      });
+    }
+
+    if(!password||!password.lenght<8){
+        return res.status(400).json({   
+        status: 'error',
+        message: 'La contraseña debe tener al menos 8 caracteres'
+        })
+    }
+    // 3. Hashear el token para comparar con DB
     const hashedToken = crypto
       .createHash('sha256')
       .update(token)
       .digest('hex');
 
-    // Buscar usuario con token válido
+    // 4. Buscar usuario
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() }
     });
 
     if (!user) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         status: 'error',
-        message: 'El token es inválido o ha expirado. Por favor solicite un nuevo enlace.' 
+        message: 'Token inválido o expirado. Solicite un nuevo enlace.'
       });
     }
 
-    // Actualizar contraseña
+    // 5. Actualizar contraseña
     user.password = password;
+    user.passwordConfirm = passwordConfirm;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    
     await user.save();
 
-    // Iniciar sesión automáticamente al usuario
-    createSendToken(user, 200, res);
-    
+    // 6. Respuesta exitosa
+    res.status(200).json({
+      status: 'success',
+      message: '¡Contraseña actualizada!'
+    });
+
+    // 7. Opcional: Enviar email de confirmación
+    await new Email(user, '/login').sendPasswordChanged();
+
   } catch (error) {
-    console.error('Error en resetPassword:', error); // Log para diagnóstico
-    next(error);
+    console.error('Error en resetPassword:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error al actualizar la contraseña',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
