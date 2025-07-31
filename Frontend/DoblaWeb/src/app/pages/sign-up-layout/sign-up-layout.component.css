@@ -1,0 +1,107 @@
+/* Estilos generales del contenedor principal */
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;  
+  height: 100vh;
+  padding: 50px;  
+  box-sizing: border-box;  
+  background-color: #f5f5f5; 
+
+  /* Sección izquierda: Contenido del formulario */
+  .login-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;    
+    position: relative;    
+    background: white;     
+    border-radius: 10px;  
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  
+
+    /* Botón "Regresar" */
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #333;
+      &:hover {
+        color: #000;
+        text-decoration: underline;
+      }
+    }
+
+    /* Título y botones */
+    h2 {
+      margin-bottom: 30px;
+      color: #333;
+      font-size: 24px;
+    }
+
+    .role-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;  
+      width: 80%;  
+
+      button {
+        padding: 12px 24px;
+        background-color: #4CAF50;  
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background-color: #45a049;  
+        }
+
+        &:first-child {
+          background-color: #2196F3;  
+          &:hover {
+            background-color: #0b7dda;
+          }
+        }
+      }
+    }
+  }
+
+  /* Sección derecha: Imagen */
+  .login-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+
+    img {
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  
+    }
+  }
+
+  /* Responsive: Móvil */
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    padding: 20px;  
+
+    .login-content {
+      order: 2;  
+      padding-top: 60px;  
+    }
+
+    .login-image {
+      order: 1;  
+      img {
+        max-height: 40vh;
+      }
+    }
+  }
+}

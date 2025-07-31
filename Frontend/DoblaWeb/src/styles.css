@@ -1,4 +1,4 @@
-/* Reset básico para elementos principales */
+/* styles.css - Versión corregida */
 html, body {
   margin: 0;
   padding: 0;
@@ -9,62 +9,48 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Usar vh para mejor compatibilidad */
+  min-height: 100vh;
 }
 
 app-root {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Ocupa todo el espacio disponible */
-  min-height: 100%; /* Asegura altura mínima */
+  flex: 1;
+  min-height: 100%;
 }
 
-/* Componentes principales */
-app-header {
+/* Headers */
+app-header, app-header-client, app-header-admin {
   background-color: #1c4aa6;
-  min-height: 10%; /* Altura mínima en porcentaje */
+  min-height: 80px; /* Cambiado a px para mejor control */
+  height: 10vh;     /* Altura relativa como respaldo */
   width: 100%;
-  flex-shrink: 0; /* Evita que se encoja */
+  flex-shrink: 0;
 }
-/*app-header-admin{*/
-  /* background-color: #1c4aa6; */
- /* min-height: 10%; /* Altura mínima en porcentaje */
-  /*width: 100%;
-  flex-shrink: 0; /* Evita que se encoja 
-}*/
+
+/* Body - Versión corregida */
 app-body {
   background-color: #f2f2f2;
-  flex: 1; /* Ocupa todo el espacio restante */
+  flex: 1;
   width: 100%;
-  overflow-y: auto; /* Scroll si el contenido excede */
-  min-height: 63%; /* Necesario para flex en algunos navegadores */
+  display: flex;          /* Añadido */
+  flex-direction: column; /* Añadido */
+  position: relative;     /* Añadido */
+  min-height: 0;          /* Importante para flexbox */
 }
 
-/*app-footer {
-  /* background-color: #f21d2f; */
-  /*min-height: 15%; /* Altura mínima en porcentaje */
-  /*width: 100vw;*/
-  /*flex-shrink: 0; /* Evita que se encoja */
-/*}*/
-
-/* Estilos comunes para los componentes */
-app-header, app-body, app-footer {
+/* Contenedor para router-outlet */
+app-body > * {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  box-sizing: border-box; /* Incluye padding en dimensiones */
+  overflow-y: auto;
 }
 
-/* Media queries para responsividad */
-@media (max-width: 600px), (max-height: 700px) {
-  app-header,
-  app-footer {
-    height: auto;
-    padding: 0.5rem;
-  }
-
-  app-body {
-    flex: 1;
-    padding: 0.5rem;
-  }
+/* Footer */
+app-footer1 {
+  flex-shrink: 0;
+  min-height: 120px; /* Altura fija recomendada */
+  height: 15vh;      /* Altura relativa como respaldo */
+  width: 100%;
 }
