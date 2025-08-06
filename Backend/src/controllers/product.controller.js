@@ -1,35 +1,49 @@
 const productDao = require('../dao/product.dao.js');
-exports.createProduct = (req, res) => {
-    const productData = req.body; // Obtiene los datos del producto del cuerpo de la solicitud
-    try {
+const APIFeatures = require('../utils/APIFeactures.util.js');
+const upload = require('../utils/upload.util.js');
 
-        productDao.createProduct(productData);
-        console.log(`Producto creado con el id:, ${product._id}`); // Imprime el resultado de la creación del producto en la consola
-        return productDao.createProduct(req.body) // Llama a la función del DAO para crear el producto
+exports.createProduct = (req, res) => {
+    try {
+        // Combina los datos del body con el usuario autenticado
+        const productData = {
+            ...req.body,
+            user: req.user.id, // Asignamos el usuario que crea el producto
+            images: req.files?.map(file => file.path) // Si usas Multer para subir imágenes
+        };
+
+        return productDao.createProduct(productData)
             .then(product => {
-                res.status(201)
-                .json({ 
+                console.log(`Producto creado con el id: ${product._id}`);
+                res.status(201).json({ 
                     success: true,
                     data: product,
                     message: "Producto creado correctamente"
-                }); // Respuesta exitosa al crear el producto
+                });
             })
             .catch(error => {
                 console.error("Error al crear el producto:", error.message);
-                res.status(500).json({ success: false, error: error.message, message: "Error al crear el producto" }); // Respuesta de error al crear el producto
+                res.status(500).json({ 
+                    success: false, 
+                    error: error.message, 
+                    message: "Error al crear el producto" 
+                });
             });
             
     } catch (error) {
-        console.error("Error al crear el producto:", error.message);
-        res.status(500).json({ success: false, error:error.message, message: "Error al crear el producto" }); // Respuesta de error al crear el producto
+        console.error("Error inesperado al crear el producto:", error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message, 
+            message: "Error inesperado al crear el producto" 
+        });
     }
-}
-exports.updateProduct = (req, res) => {// Esta función recibe el ID del producto, los nuevos datos del producto y el ID del usuario que lo actualiza
-    const id = req.params.product_id; // El ID del producto viene de los parámetros de la URL
-    const productData = req.body; // Los nuevos datos vienen del cuerpo de la solicitud
+};
+
+exports.updateProduct = (req, res) => {
+    const id = req.params.product_id;
+    const productData = req.body;
 
     try {
-        // Llama a la función del DAO para actualizar el producto
         return productDao.updateProduct(id, productData) 
             .then(product => {
                 if (!product) {
@@ -39,15 +53,14 @@ exports.updateProduct = (req, res) => {// Esta función recibe el ID del product
                     });
                 }
 
-                console.log(`✅ Producto actualizado con el id: ${id}`); // Imprime el resultado en consola
-                res.status(200)
-                .json({ 
+                console.log(`✅ Producto actualizado con el id: ${id}`);
+                res.status(200).json({ 
                     success: true, 
                     data: { 
                         message: "Producto actualizado correctamente",
                         product: product
                     }
-                }); // Respuesta exitosa al actualizar el producto
+                });
             })
             .catch(error => { 
                 console.error("Error al actualizar el producto:", error.message);
@@ -68,32 +81,50 @@ exports.updateProduct = (req, res) => {// Esta función recibe el ID del product
     }
 };
 
-exports.getAllProducts = (req,res) => {// Esta función obtiene todos los productos de la base de datos
-    try{
-    return  productDao.getAllProducts() // Llama a la función del DAO para obtener todos los productos
-    .then(products => {
-        if (!products || products.length === 0) {
-            return res.status(404).json({ success: false, message: 'No se encontraron productos' });
-        }
-        console.log(`✅ Productos obtenidos correctamente`);
-        res.status(200).json({ success: true, data: products }); // Respuesta exitosa al obtener los productos
-    })
-    .catch(error => {
-        console.error("Error al obtener los productos:", error.message);
-        res.status(500).json({ success: false, error: error.message, message: "Error al obtener los productos" }); // Respuesta de error al obtener los productos
-    });
-}catch (error) {
-        console.error("Error inesperado al obtener los productos:", error.message);
-        res.status(500).json({ success: false, error: error.message, message: "Error inesperado al obtener los productos" }); // Respuesta de error inesperado al obtener los productos
-    }
-}
+exports.getAllProducts = (req, res) => {
+    try {
+        const features = new APIFeatures(productDao.getAllProducts(), req.query)
+            .filter()
+            .sort()
+            .paginate();
 
-exports.deleteProduct = (req, res) => { // Esta función recibe el ID del producto y lo elimina de la base de datos
-    // Elimina un producto de la base de datos
-    const id = req.params.product_id; // El ID del producto viene de los parámetros de la URL
+        return features.query
+            .then(products => {
+                if (!products || products.length === 0) {
+                    return res.status(404).json({ 
+                        success: false, 
+                        message: 'No se encontraron productos' 
+                    });
+                }
+                console.log(`✅ Productos obtenidos correctamente`);
+                res.status(200).json({ 
+                    success: true, 
+                    results: products.length,
+                    data: products 
+                });
+            })
+            .catch(error => {
+                console.error("Error al obtener los productos:", error.message);
+                res.status(500).json({ 
+                    success: false, 
+                    error: error.message, 
+                    message: "Error al obtener los productos" 
+                });
+            });
+    } catch (error) {
+        console.error("Error inesperado al obtener los productos:", error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message, 
+            message: "Error inesperado al obtener los productos" 
+        });
+    }
+};
+
+exports.deleteProduct = (req, res) => {
+    const id = req.params.product_id;
 
     try {
-        // Llama a la función del DAO para eliminar el producto
         return productDao.deleteProduct(id)
             .then(deleted => {
                 if (!deleted) {
@@ -103,7 +134,7 @@ exports.deleteProduct = (req, res) => { // Esta función recibe el ID del produc
                     });
                 }
 
-                console.log(`Producto eliminado con el id: ${id}`); // Imprime el resultado en consola
+                console.log(`Producto eliminado con el id: ${id}`);
                 res.status(200).json({
                     success: true,
                     message: "Producto eliminado correctamente"
@@ -125,4 +156,43 @@ exports.deleteProduct = (req, res) => { // Esta función recibe el ID del produc
             message: "Error inesperado al eliminar el producto"
         });
     }
-}
+};
+
+// Opcional: Endpoint para subir imágenes
+exports.uploadProductImages = (req, res) => {
+    try {
+        const uploadMiddleware = upload.array('images', 5); // Máximo 5 imágenes
+        
+        uploadMiddleware(req, res, (error) => {
+            if (error) {
+                console.error("Error al subir imágenes:", error.message);
+                return res.status(400).json({
+                    success: false,
+                    error: error.message,
+                    message: "Error al subir imágenes"
+                });
+            }
+
+            if (!req.files || req.files.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "No se subieron archivos"
+                });
+            }
+
+            const filePaths = req.files.map(file => file.path);
+            res.status(200).json({
+                success: true,
+                data: filePaths,
+                message: "Imágenes subidas correctamente"
+            });
+        });
+    } catch (error) {
+        console.error("Error inesperado al subir imágenes:", error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Error inesperado al subir imágenes"
+        });
+    }
+};
