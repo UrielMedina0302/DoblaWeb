@@ -2,6 +2,8 @@ const User= require('../models/User.model'); // Importa el modelo de usuario
 const crypto = require('crypto'); // Importa el módulo crypto para generar tokens de restablecimiento de contraseña
 const sendEmail = require('../utils/email.util.js'); // Importa la función para enviar correos electrónicos
 const { CreateSendToken} = require('../utils/auth.util.js'); // Importa la función para crear y enviar el token
+const jwt = require ('jsonwebtoken')
+
 exports.signup = async (req, res, next) => {// Controlador para registrar un nuevo usuario
     try {
         const { name, lastname, email, password, passwordConfirm } = req.body; // Extrae los datos del cuerpo de la solicitud
@@ -34,41 +36,79 @@ exports.signup = async (req, res, next) => {// Controlador para registrar un nue
     }
 }
 
+// Modifica el método login para incluir todos los datos necesarios
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    //Verificar que el email y la contraseña existen
-    if (!email || !password) {
-        return res.status(400).json({ 
-            status: 'error',
-            error: 'Email y contraseña son requeridos' });
-        }
 
-    // Buscar al usuario por email y verificar la contraseña
-    const user = await User.findOne({ email }).select('+password');
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ error: 'Email o contraseña incorrectas' });
+    // 1. Validar entrada
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Email y contraseña son requeridos'
+      });
     }
 
-    //const token = user.generateAuthToken();// Generar el token de autenticación
-    CreateSendToken(user, 200, res); // Llama a la función para crear y enviar el token de autenticación
-    // Enviar token en la respuesta (no en cookies)
-    res.json({ 
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
+    // 2. Buscar usuario y verificar contraseña
+    const user = await User.findOne({ email }).select('+password');
+    
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({
+        status: 'error',
+        error: 'Email o contraseña incorrectas'
+      });
+    }
+
+    // 3. Generar token JWT con TODOS los datos necesarios
+    const token = jwt.sign(
+      {
+        userId: user._id,  // Asegúrate de usar userId
         email: user.email,
-        role: user.role
+        role: user.role,
+        name: user.name    // Agrega cualquier dato adicional necesario
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '90d' }
+    );
+
+    // 4. Configurar cookie
+    const cookieOptions = {
+      expires: new Date(
+        Date.now() + (process.env.JWT_COOKIE_EXPIRES || 90) * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    };
+
+    // 5. Enviar respuesta
+    res.cookie('jwt', token, cookieOptions);
+
+    // Eliminar la contraseña del output
+    user.password = undefined;
+
+    res.status(200).json({
+      status: 'success',
+      token,
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role,
+          name: user.name
+        }
       }
     });
-    //Si todo esta bien, se envia token al cliente
-    CreateSendToken(user, 200, res); // Llama a la función para crear y enviar el token de autenticación
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error en login:', error);
+    res.status(500).json({
+      status: 'error',
+      error: 'Error interno del servidor'
+    });
   }
 };
+
 
 // Obtener usuario actual (GET)
 exports.getCurrentUser = async (req, res) => {

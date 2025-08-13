@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "clean": "rd /s /q node_modules\\.cache && npm cache clean --force",
+    "reset": "npm run clean && rd /s /q node_modules && npm install"
   },
   "keywords": [],
   "author": "",
@@ -21,8 +23,20 @@
     "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
+    "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
     "pug": "^3.0.3"
+  },
+  "nodemonConfig": {
+    "delay": 1500,
+    "watch": [
+      "src/"
+    ],
+    "ignore": [
+      "src/**/*.spec.js"
+    ],
+    "verbose": true,
+    "exec": "node --trace-warnings"
   },
   "devDependencies": {
     "morgan": "^1.10.0",

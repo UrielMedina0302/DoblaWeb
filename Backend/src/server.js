@@ -1,40 +1,75 @@
-//En este apartado se configura Express y se definen las rutas de la aplicación
-require('dotenv').config({path:'.env'}); // Cargar las variables de entorno desde el archivo .env
+require('dotenv').config({ path: '.env' });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit'); // Importar express-rate-limit para limitar las solicitudes
+const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
-const productRouter = require('./routes/product.route.js'); // Importar las rutas de productos
-const userRouter = require('./routes/user.route.js'); // Importar las rutas de usuarios
-const authRouter = require('./routes/auth.route.js'); // Importar las rutas de autenticación
-const connectDB = require('./Database'); // Importar la función para conectar a la base de datos
-connectDB(); // Llamar a la función para conectar a la base de datos
-// Importar las dependencias necesarias para la aplicación Express
-const app = express(); // Crear una instancia de Express
-//Settings
-app.set('port', process.env.PORT || 3000); // Configurar el puerto de la aplicación, usando una variable de entorno o el puerto 3000 por defecto
-// app.set('view engine', 'ejs'); // Configurar el motor de plantillas EJS para renderizar vistas
-//Middleware para el mejor manejo de express
+const connectDB = require('./Database');
+connectDB();
+
+const app = express();
+
+// Settings
+app.set('port', process.env.PORT || 3000);
+
+// Middlewares
 app.use(cors({
-  origin: 'http://localhost:4200' // Reemplaza con tu URL en producción
+  origin: 'http://localhost:4200',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100 // Limitar a 100 solicitudes por IP
+  windowMs: 15 * 60 * 1000,
+  max: 100
 });
-app.use('/api/auth',limiter); // Aplicar el limitador de solicitudes
-app.use(helmet()); // Proteger la aplicación con Helmet
-app.use(express.json()) ; // Parsear el cuerpo de las solicitudes para que pueda entender JSON
-app.use(express.urlencoded({ extended: true })); // Parsear datos URL-encoded
-app.use(morgan('dev')); // Registrar las solicitudes HTTP en la consola
-// Importar las rutas de productos
-app.use('/api/product', productRouter); // Usar las rutas de productos bajo el prefijo /api/products
-app.use('/api/user', userRouter); // Usar las rutas de usuarios bajo el prefijo /api/users
-app.use('/api/auth', authRouter); // Usar las rutas de autenticación bajo el prefijo /api/auth
-app.listen(app.get('port'), () => { // Iniciar el servidor en el puerto configurado
-    console.log(`Server running on port ${app.get('port')}`); // Mensaje en la consola indicando que el servidor está corriendo
+
+app.use(helmet());
+app.use(morgan('dev'));
+app.use(express.urlencoded({ extended: true }));
+
+// IMPORTANTE: Elimina el jsonMiddleware global
+// Solo aplica express.json() a rutas específicas
+const jsonMiddleware = express.json();
+
+// Routers
+const productRouter = require('./routes/product.route');
+const userRouter = require('./routes/user.route');
+const authRouter = require('./routes/auth.route');
+
+app.use('/api/product', productRouter); // Multer manejará FormData
+app.use('/api/user', jsonMiddleware, userRouter); // Solo JSON
+app.use('/api/auth', limiter, jsonMiddleware, authRouter); // Solo JSON
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  
+  // Errores de validación
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Error de validación',
+      errors: err.errors
+    });
+  }
+  
+  // Errores de Multer
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      success: false,
+      message: err.message || 'Archivo demasiado grande'
+    });
+  }
+  
+  // Otros errores
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Error interno del servidor',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
 });
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
-// Exportar la aplicación para usarla en otros archivos
-module.exports = app; // Exportar la instancia de Express para usarla en el servidor 
+
+app.listen(app.get('port'), () => {
+  console.log(`Server running on port ${app.get('port')}`);
+});

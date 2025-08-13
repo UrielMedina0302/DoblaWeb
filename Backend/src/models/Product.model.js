@@ -2,10 +2,6 @@ const mongoose = require('mongoose'); //Se importa moongose para poder trabajar 
 const {Schema} = mongoose; //Se importa el esquema de mongoose para poder definir el modelo de producto
 
 const productSchema = new mongoose.Schema({
-    // productId:{
-    //     type:Number,
-    //     required: true, // Este campo es obligatorio
-    // },
     name: {
         type: String,
         required: true, // Este campo es obligatorio
@@ -31,4 +27,4 @@ const productSchema = new mongoose.Schema({
     });
 
 // Exportar el modelo de producto para poder usarlo en otras partes de la aplicación
-module.exports = mongoose.model('Product', productSchema); //El modelo de producto se define con  
+module.exports = mongoose.models.Product || mongoose.model('Product', productSchema);

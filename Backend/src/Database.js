@@ -1,6 +1,17 @@
 const mongoose = require('mongoose');
 // require('dotenv').config(); // Cargar las variables de entorno desde el archivo .env
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected');
+  mongoose.models = {};
+  mongoose.modelSchemas = {};
+});
 
+// Limpiar modelos al desconectar
+mongoose.connection.on('disconnected', () => {
+  console.log('Mongoose disconnected');
+  mongoose.models = {};
+  mongoose.modelSchemas = {};
+});
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI|| "mongodb+srv://valienteua17:METU050302@cluster230768.uubu1.mongodb.net/DoblaWeb?retryWrites=true&w=majority&appName=Cluster230768");

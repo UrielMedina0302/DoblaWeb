@@ -19,9 +19,14 @@ exports.getProductById = async (id) => {// Esta función recibe el ID del produc
         console.error("Error al obtener el producto por ID",  error.message);
     }
 };
+
+exports.getAllProductsQuery = () => {
+    return Product.find(); // Devuelve la Query sin ejecutar
+};
+
 exports.getAllProducts = async () => {// Esta función obtiene todos los productos de la base de datos
     try {
-        return await Product.find()
+        return await Product.find().exec();
     } catch (error) {
         console.error("Error al obtener todos los productos", error.message);
     }

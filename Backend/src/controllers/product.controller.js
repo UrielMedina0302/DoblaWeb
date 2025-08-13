@@ -1,198 +1,199 @@
-const productDao = require('../dao/product.dao.js');
-const APIFeatures = require('../utils/APIFeactures.util.js');
-const upload = require('../utils/upload.util.js');
 
-exports.createProduct = (req, res) => {
-    try {
-        // Combina los datos del body con el usuario autenticado
-        const productData = {
-            ...req.body,
-            user: req.user.id, // Asignamos el usuario que crea el producto
-            images: req.files?.map(file => file.path) // Si usas Multer para subir imágenes
-        };
+const productDao = require('../dao/product.dao');
+const APIFeatures = require('../utils/APIFeactures.util.js')
+const fs = require('fs');
+const path = require('path');
+const { createError } = require('http-errors');
+const { UPLOAD_DIR } = require('../utils/upload.util');
 
-        return productDao.createProduct(productData)
-            .then(product => {
-                console.log(`Producto creado con el id: ${product._id}`);
-                res.status(201).json({ 
-                    success: true,
-                    data: product,
-                    message: "Producto creado correctamente"
-                });
-            })
-            .catch(error => {
-                console.error("Error al crear el producto:", error.message);
-                res.status(500).json({ 
-                    success: false, 
-                    error: error.message, 
-                    message: "Error al crear el producto" 
-                });
-            });
-            
-    } catch (error) {
-        console.error("Error inesperado al crear el producto:", error.message);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message, 
-            message: "Error inesperado al crear el producto" 
-        });
-    }
+// Helper para limpiar archivos subidos en caso de error
+const cleanUploadedFiles = (files) => {
+  if (files && files.length > 0) {
+    files.forEach(file => {
+      try {
+        fs.unlinkSync(file.path);
+      } catch (err) {
+        console.error(`Error al eliminar archivo ${file.path}:`, err);
+      }
+    });
+  }
 };
 
-exports.updateProduct = (req, res) => {
+exports.createProduct = async (req, res, next) => {
+  try {
+    let productData = {
+      name: req.body.name,
+      description: req.body.description,
+      isActive: req.body.isActive === 'true'
+    };
+
+    // Procesar imágenes si existen
+    if (req.files && req.files.length > 0) {
+      productData.images = req.files.map(file => ({
+        path: file.path,
+        filename: file.filename,
+        mimetype: file.mimetype,
+        size: file.size
+      }));
+    } else if (req.body.images) {
+      // Para JSON con URLs de imágenes existentes
+      productData.images = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+    }
+
+    // Validación mejorada
+    if (!productData.name || !productData.description) {
+      cleanUploadedFiles(req.files);
+      throw createError(400, 'Nombre y descripción son requeridos');
+    }
+
+    // Validar longitud máxima
+    if (productData.name.length > 100) {
+      cleanUploadedFiles(req.files);
+      throw createError(400, 'El nombre no puede exceder los 100 caracteres');
+    }
+
+    // Guardar en BD
+    const newProduct = await Product.create(productData);
+
+    res.status(201).json({
+      success: true,
+      data: newProduct
+    });
+
+  } catch (error) {
+    cleanUploadedFiles(req.files);
+    next(error);
+  }
+};
+
+exports.updateProduct = async (req, res, next) => {
+  try {
     const id = req.params.product_id;
     const productData = req.body;
 
-    try {
-        return productDao.updateProduct(id, productData) 
-            .then(product => {
-                if (!product) {
-                    return res.status(404).json({
-                        success: false,
-                        message: 'Producto no encontrado'
-                    });
-                }
-
-                console.log(`✅ Producto actualizado con el id: ${id}`);
-                res.status(200).json({ 
-                    success: true, 
-                    data: { 
-                        message: "Producto actualizado correctamente",
-                        product: product
-                    }
-                });
-            })
-            .catch(error => { 
-                console.error("Error al actualizar el producto:", error.message);
-                res.status(500).json({ 
-                    success: false, 
-                    error: error.message, 
-                    message: "Error al actualizar el producto" 
-                });
-            });
-
-    } catch (error) {
-        console.error("Error inesperado al actualizar el producto:", error.message);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message, 
-            message: "Error inesperado al actualizar el producto" 
-        });
+    // Validación básica
+    if (!productData || Object.keys(productData).length === 0) {
+      throw createError(400, 'Datos de actualización requeridos');
     }
+
+    const updatedProduct = await productDao.updateProduct(id, productData);
+
+    if (!updatedProduct) {
+      throw createError(404, 'Producto no encontrado');
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        message: "Producto actualizado correctamente",
+        product: updatedProduct
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.getAllProducts = (req, res) => {
-    try {
-        const features = new APIFeatures(productDao.getAllProducts(), req.query)
-            .filter()
-            .sort()
-            .paginate();
+exports.getAllProducts = async (req, res, next) => {
+  try {
+    const query = productDao.getAllProductsQuery();
+    const features = new APIFeatures(query, req.query)
+      .filter()
+      .sort()
+      .paginate();
 
-        return features.query
-            .then(products => {
-                if (!products || products.length === 0) {
-                    return res.status(404).json({ 
-                        success: false, 
-                        message: 'No se encontraron productos' 
-                    });
-                }
-                console.log(`✅ Productos obtenidos correctamente`);
-                res.status(200).json({ 
-                    success: true, 
-                    results: products.length,
-                    data: products 
-                });
-            })
-            .catch(error => {
-                console.error("Error al obtener los productos:", error.message);
-                res.status(500).json({ 
-                    success: false, 
-                    error: error.message, 
-                    message: "Error al obtener los productos" 
-                });
-            });
-    } catch (error) {
-        console.error("Error inesperado al obtener los productos:", error.message);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message, 
-            message: "Error inesperado al obtener los productos" 
-        });
+    const products = await features.query;
+
+    if (!products?.length) {
+      return res.status(200).json({
+        success: true,
+        results: 0,
+        message: 'No se encontraron productos',
+        data: []
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      results: products.length,
+      data: products
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.deleteProduct = (req, res) => {
+exports.getProductById = async (req, res, next) => {
+  try {
+    const product = await productDao.getProductById(req.params.product_id);
+
+    if (!product) {
+      throw createError(404, 'Producto no encontrado');
+    }
+
+    res.status(200).json({
+      success: true,
+      data: product
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteProduct = async (req, res, next) => {
+  try {
     const id = req.params.product_id;
+    const deletedProduct = await productDao.deleteProduct(id);
 
-    try {
-        return productDao.deleteProduct(id)
-            .then(deleted => {
-                if (!deleted) {
-                    return res.status(404).json({
-                        success: false,
-                        message: 'Producto no encontrado'
-                    });
-                }
-
-                console.log(`Producto eliminado con el id: ${id}`);
-                res.status(200).json({
-                    success: true,
-                    message: "Producto eliminado correctamente"
-                });
-            })
-            .catch(error => {
-                console.error("Error al eliminar el producto:", error.message);
-                res.status(500).json({
-                    success: false,
-                    error: error.message,
-                    message: "Error al eliminar el producto"
-                });
-            });
-    } catch (error) {
-        console.error("Error inesperado al eliminar el producto:", error.message);
-        res.status(500).json({
-            success: false,
-            error: error.message,
-            message: "Error inesperado al eliminar el producto"
-        });
+    if (!deletedProduct) {
+      throw createError(404, 'Producto no encontrado');
     }
+
+    // Eliminar imágenes asociadas si existen
+    if (deletedProduct.images && deletedProduct.images.length > 0) {
+      deletedProduct.images.forEach(image => {
+        const filePath = path.join(UPLOAD_DIR, image.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Producto eliminado correctamente"
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };
 
-// Opcional: Endpoint para subir imágenes
-exports.uploadProductImages = (req, res) => {
-    try {
-        const uploadMiddleware = upload.array('images', 5); // Máximo 5 imágenes
-        
-        uploadMiddleware(req, res, (error) => {
-            if (error) {
-                console.error("Error al subir imágenes:", error.message);
-                return res.status(400).json({
-                    success: false,
-                    error: error.message,
-                    message: "Error al subir imágenes"
-                });
-            }
-
-            if (!req.files || req.files.length === 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: "No se subieron archivos"
-                });
-            }
-
-            const filePaths = req.files.map(file => file.path);
-            res.status(200).json({
-                success: true,
-                data: filePaths,
-                message: "Imágenes subidas correctamente"
-            });
-        });
-    } catch (error) {
-        console.error("Error inesperado al subir imágenes:", error.message);
-        res.status(500).json({
-            success: false,
-            error: error.message,
-            message: "Error inesperado al subir imágenes"
-        });
+exports.uploadProductImages = async (req, res, next) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      throw createError(400, 'No se subieron archivos');
     }
+
+    const uploadedFiles = req.files.map(file => ({
+      path: file.path,
+      filename: file.filename,
+      mimetype: file.mimetype,
+      size: file.size,
+      url: `/uploads/products/${file.filename}`
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: uploadedFiles,
+      message: "Imágenes subidas correctamente"
+    });
+
+  } catch (error) {
+    cleanUploadedFiles(req.files);
+    next(error);
+  }
 };

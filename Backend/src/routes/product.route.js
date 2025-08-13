@@ -1,52 +1,48 @@
 const express = require('express');
 const router = express.Router();
-const productController = require('../controllers/product.controller.js');
-const { authenticate } = require('../middlewares/auth.middleware.js');
-const { checkAdminRole } = require('../middlewares/checkRole.middleware.js');
-const upload = require('../utils/upload.util.js');
+const productController = require('../controllers/product.controller');
+const { authenticate } = require('../middlewares/auth.middleware');
+const { checkAdminRole } = require('../middlewares/checkRole.middleware');
+const { smartUpload, handleUploadErrors } = require('../utils/upload.util');
+
+// Middleware para respuestas consistentes
+router.use((req, res, next) => {
+  res.type('json');
+  next();
+});
 
 // Rutas públicas
 router.get('/', productController.getAllProducts);
+router.get('/:product_id', productController.getProductById);
 
-// Middleware de autenticación aplicado solo a rutas específicas
-router.use(authenticate);
+// Rutas protegidas
+router.use(authenticate, checkAdminRole);
 
-// Subida de imágenes (simplificado y más robusto)
-router.post('/upload', 
-  (req, res, next) => {
-    // Middleware para manejar errores de Multer
-    upload.array('images', 5)(req, res, (err) => {
-      if (err) {
-        let errorMessage = "Error al subir imágenes";
-        if (err.code === 'LIMIT_FILE_SIZE') {
-          errorMessage = "El tamaño del archivo excede el límite permitido (5MB)";
-        } else if (err.message.includes('file type')) {
-          errorMessage = "Solo se permiten imágenes JPEG/PNG";
-        }
-        return res.status(400).json({ 
-          success: false, 
-          message: errorMessage,
-          error: err.message 
-        });
-      }
-      
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: "No se proporcionaron archivos para subir"
-        });
-      }
-      
-      next();
-    });
-  },
-  productController.uploadProductImages
+// Ruta para crear/actualizar producto (inteligente)
+router.post(
+  '/',
+  smartUpload('images', 5),
+  handleUploadErrors,
+  productController.createProduct
 );
 
-// Rutas solo para admin
-router.use(checkAdminRole); // Aplica a todas las rutas siguientes
-router.post('/', productController.createProduct);
-router.patch('/:product_id', productController.updateProduct);
+// Ruta para actualizar datos del producto (sin imágenes)
+router.patch(
+  '/:product_id',
+  express.json(),
+  productController.updateProduct
+);
+
+// Ruta para eliminar producto
 router.delete('/:product_id', productController.deleteProduct);
+
+// Manejador de errores específico
+router.use((err, req, res, next) => {
+  console.error('Error en rutas de productos:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Error interno del servidor'
+  });
+});
 
 module.exports = router;
