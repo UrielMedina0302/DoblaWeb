@@ -1,5 +1,4 @@
 <div class="signup-container">
-  <!-- Sección izquierda (formulario) -->
   <div class="signup-content">
     <button class="back-button" routerLink="/">← Regresar</button>
     <h2>Crear cuenta</h2>
@@ -35,7 +34,14 @@
                [(ngModel)]="userData.confirmPassword" name="confirmPassword" required>
       </div>
       
-      <button type="submit" class="signup-button">Registrar</button>
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      
+      <button type="submit" class="signup-button" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Registrar</span>
+        <span *ngIf="isLoading">Cargando...</span>
+      </button>
       
       <div class="social-login">
         <p class="divider">O registrarse con</p>
@@ -55,7 +61,6 @@
     </form>
   </div>
 
-  <!-- Sección derecha (imagen) -->
   <div class="signup-image">
     <img src="assets/auth/signup-image.png" alt="Imagen de registro">
   </div>

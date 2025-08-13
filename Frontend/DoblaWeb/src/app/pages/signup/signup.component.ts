@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule ],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css']
 })
@@ -21,23 +21,42 @@ export class SignupComponent {
     confirmPassword: ''
   };
 
-  constructor(private userService: UserService) {}
+  errorMessage: string = '';
+  isLoading: boolean = false;
+  passwordMismatch: boolean = false;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   onSubmit() {
-    // Validación básica
+    // Validación de contraseñas
     if (this.userData.password !== this.userData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      this.passwordMismatch = true;
+      this.errorMessage = 'Las contraseñas no coinciden';
       return;
     }
-    // Llama al servicio de registro
-    this.userService.signup(this.userData).subscribe({
-      next: (response) => {
-        console.log('Registro exitoso', response);
-        // Redirige al usuario o muestra mensaje de éxito
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.signup({
+      name: this.userData.name,
+      lastname: this.userData.lastname,
+      email: this.userData.email,
+      password: this.userData.password
+    }).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
       },
-      error: (error) => {
-        console.error('Error en registro', error);
-        // Muestra mensaje de error al usuario
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al registrar usuario';
+        this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
-  }}
+  }
+}

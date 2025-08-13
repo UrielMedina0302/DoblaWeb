@@ -1,70 +1,114 @@
-<div class="product-grid">
-  <div class="product-card-wrapper" *ngFor="let product of products; let i = index">
-    <div class="product-card">
+<div class="product-admin-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading && products.length === 0" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando productos...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Product List -->
+  <div class="product-grid">
+    <div *ngFor="let product of products" class="product-card">
       <div class="product-image">
-        <img [src]="product.image" [alt]="product.name">
+        <img [src]="product.images && product.images.length > 0 ? getFullImageUrl(product.images[0]) : 'assets/default-product.png'" 
+             [alt]="product.name">
+        <span class="status-badge" [class.active]="product.isActive">
+          {{ product.isActive ? 'Activo' : 'Inactivo' }}
+        </span>
       </div>
       <div class="product-info">
-        <h3 class="product-title">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
-        <div class="product-footer">
-          <span class="product-price">${{ product.price }} MXN</span>
-          <div class="action-buttons">
-            <button class="edit-btn" (click)="openModal('edit', i)">
-              <i class="fas fa-edit"></i> Editar
-            </button>
-            <button class="delete-btn" (click)="deleteProduct(i)">
-              <i class="fas fa-trash-alt"></i> Eliminar
-            </button>
-          </div>
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <div class="product-actions">
+          <button (click)="toggleProductStatus(product)" [class.btn-active]="product.isActive">
+            {{ product.isActive ? 'Desactivar' : 'Activar' }}
+          </button>
+          <button (click)="openModal('edit', product._id)">Editar</button>
+          <button (click)="deleteProduct(product._id)" class="btn-delete">Eliminar</button>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- Botón agregar externo -->
-  <button class="add-another-btn external-btn" (click)="openModal('add')">
-    <i class="fas fa-plus-circle"></i> Agregar otro
-  </button>
-</div>
 
-<!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3>{{ modalTitle }}</h3>
-      <button class="close-btn" (click)="closeModal()">&times;</button>
-    </div>
-    
-    <div class="modal-body">
-      <form [formGroup]="productForm">
-        <div class="form-group">
-          <label>Nombre del Producto</label>
-          <input type="text" formControlName="name" class="form-control">
-        </div>
-        
-        <div class="form-group">
-          <label>Descripción</label>
-          <textarea formControlName="description" class="form-control" rows="3"></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Precio (MXN)</label>
-          <input type="number" formControlName="price" class="form-control">
-        </div>
-        
-        <div class="form-group">
-          <label>Imagen (URL)</label>
-          <input type="text" formControlName="image" class="form-control">
-        </div>
-      </form>
-    </div>
-    
-    <div class="modal-footer">
-      <button class="cancel-btn" (click)="closeModal()">Cancelar</button>
-      <button class="submit-btn" (click)="submitForm()" [disabled]="!productForm.valid">
-        {{ currentAction === 'add' ? 'Agregar' : 'Guardar' }}
-      </button>
+  <!-- Add Product Button -->
+  <button (click)="openModal('add')" class="add-product-btn btn-primary">
+    <i class="fas fa-plus"></i> Agregar Producto
+  </button>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ currentAction === 'add' ? 'Agregar Producto' : 'Editar Producto' }}</h3>
+        <button (click)="closeModal()" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Formulario reactivo con ngSubmit -->
+        <form [formGroup]="productForm" (ngSubmit)="submitForm()" #form="ngForm">
+          <div class="form-group">
+            <label for="name">Nombre*</label>
+            <input 
+              type="text" 
+              id="name" 
+              formControlName="name"
+              [class.invalid]="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+            <small *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+              Nombre requerido (3-100 caracteres)
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descripción*</label>
+            <textarea 
+              id="description" 
+              formControlName="description" 
+              rows="3"
+              [class.invalid]="productForm.get('description')?.invalid && productForm.get('description')?.touched"></textarea>
+            <small *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched">
+              Descripción requerida (10-500 caracteres)
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="images">Imágenes*</label>
+            <input 
+              type="file" 
+              id="images"
+              multiple 
+              (change)="onFileSelected($event)" 
+              accept="image/*"
+              [class.invalid]="selectedFiles.length === 0 && form.submitted">
+            <small>Máximo 5 imágenes (JPEG, PNG)</small>
+            
+            <div class="image-previews">
+              <div *ngFor="let url of previewUrls; let i = index" class="image-preview">
+                <img [src]="url" alt="Preview">
+                <button type="button" (click)="removeImage(i)" class="remove-image-btn">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <small *ngIf="selectedFiles.length === 0 && form.submitted" class="error-text">
+              Debes seleccionar al menos una imagen
+            </small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" (click)="closeModal()" class="btn-cancel">Cancelar</button>
+            <button 
+              type="submit" 
+              [disabled]="productForm.invalid || isLoading"
+              class="btn-submit">
+              {{ isLoading ? 'Procesando...' : (currentAction === 'add' ? 'Crear' : 'Actualizar') }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
+
