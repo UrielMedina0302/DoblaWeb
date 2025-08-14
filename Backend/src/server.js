@@ -16,8 +16,9 @@ app.set('port', process.env.PORT || 3000);
 app.use(cors({
   origin: 'http://localhost:4200',
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-data']
 }));
+
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
