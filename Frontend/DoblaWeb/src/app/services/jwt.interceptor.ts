@@ -10,29 +10,38 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  // 1. Excluir endpoints públicos (ajusta según tus necesidades)
+  // 1. Lista actualizada de endpoints públicos
   const publicEndpoints = [
     '/auth/login',
     '/auth/signup',
+    '/auth/forgotPassword', // <-- Añade esta línea
+    '/auth/reset-password', // <-- Y esta si aplica
     '/auth/refresh-token',
     '/public/'
   ];
 
-  if (publicEndpoints.some(endpoint => req.url.includes(endpoint))) {
-    return next(req);
+  // Verifica si la URL coincide con algún endpoint público
+  const isPublicEndpoint = publicEndpoints.some(endpoint => 
+    req.url.includes(endpoint) || 
+    req.url.endsWith(endpoint.replace(/\/$/, ''))
+  );
+
+  // 2. Excluir completamente endpoints públicos
+  if (isPublicEndpoint) {
+    return next(req); // No modifica la request para endpoints públicos
   }
 
-  // 2. Manejo cuando no hay token
+  // 3. Manejo cuando no hay token (solo para rutas protegidas)
   if (!token) {
     authService.logout();
     return throwError(() => ({
       status: 401,
       message: 'Sesión no autenticada',
-      redirectToLogin: true // Bandera personalizada
+      redirectToLogin: true
     }));
   }
 
-  // 3. Clonar request con headers de autenticación
+  // 4. Clonar request con headers de autenticación (solo para rutas protegidas)
   const authReq = req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`,
@@ -41,10 +50,9 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     }
   });
 
-  // 4. Manejo de errores
+  // 5. Manejo de errores
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Caso especial cuando el token expira
       if (error.status === 401 && !req.url.includes('/auth/logout')) {
         authService.logout();
         router.navigate(['/login'], {
@@ -55,7 +63,6 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         });
       }
       
-      // Propaga el error con información adicional
       return throwError(() => ({
         ...error,
         authError: true,

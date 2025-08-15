@@ -80,6 +80,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "proxyConfig": "proxy.conf.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

@@ -12,6 +12,8 @@ import { InicioAdminComponent } from './pages/inicio-admin/inicio-admin.componen
 import { ProductoAdminComponent } from './pages/producto-admin/producto-admin.component';
 import { NosotrosAdminComponent } from './pages/nosotros-admin/nosotros-admin.component';
 import { ContactoAdminComponent } from './pages/contacto-admin/contacto-admin.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 export const routes: Routes = [
     // Mantenemos tus rutas exactamente como las tienes:
   { path: '', component: HomeComponent, data: { showFooter: true } },
@@ -27,7 +29,8 @@ export const routes: Routes = [
   { path: 'contacto-admin', component: ContactoAdminComponent, data: { showHeaderAdmin: true }},
   { path: 'login-layout', component: LoginLayoutComponent },
   { path: 'signup-layout', component: SignUpLayoutComponent },
-  
+  {path: 'forgot-password', component: ForgotPasswordComponent, data: { hideHeaders: true }},
+  { path: 'reset-password', component: ResetPasswordComponent, data: { hideHeaders: true }},
   // Modificamos solo la ruta comodín para evitar redirecciones no deseadas
   { path: '**', component: HomeComponent } // En lugar de redirectTo
 ];

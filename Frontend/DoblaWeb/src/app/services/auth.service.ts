@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Observable, tap, catchError, throwError, of } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { HttpHeaders } from '@angular/common/http';
 
 interface User {
   id: number;
@@ -177,4 +178,47 @@ export class AuthService {
       return true;
     }
   }
+  requestPasswordReset(email: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'X-Request-Source': 'Angular-Forgot-Password'
+    });
+
+    return this.http.post(
+      `${this.apiUrl}/forgotPassword`,
+      { email },
+      { headers , withCredentials:false}
+    ).pipe(
+      catchError(error => {
+        console.error('Error en requestPasswordReset:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+resetPassword(token: string, newPassword: string): Observable<{message: string}> {
+  return this.http.patch<{message: string}>(
+    `${this.apiUrl}/resetPassword/${token}`,
+ { 
+      password: newPassword,
+      passwordConfirm: newPassword // Asegúrate que coincida con el backend
+    }
+  ).pipe(
+    catchError(error => {
+      // Mejor manejo de errores
+      let errorMessage = 'Error al cambiar la contraseña';
+      
+      if (error.error) {
+        errorMessage = error.error.message || 
+                      error.error.error?.message || 
+                      errorMessage;
+      }
+
+      return throwError(() => ({
+        message: errorMessage,
+        status: error.status || 500
+      }));
+    })
+  );
+}
 }

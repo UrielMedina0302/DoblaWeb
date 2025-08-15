@@ -6,12 +6,13 @@ import { BodyComponent } from './components/body/body.component';
 import { HeaderAdminComponent } from './components/header-admin/header-admin.component';
 import { Footer1Component } from './components/footer1/footer1.component';
 import { HeaderClientComponent } from './components/header-client/header-client.component';
-
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
+     ReactiveFormsModule,
     RouterModule,
     HeaderComponent,
     BodyComponent,
@@ -63,7 +64,7 @@ export class AppComponent implements OnInit {
   console.log('URL:', url, 'BasePath:', basePath); // Debug importante
 
   // Rutas que NO deben mostrar headers/footer
-  const isAuthRoute = ['login', 'signup', 'login-layout', 'signup-layout'].includes(basePath);
+  const isAuthRoute = ['login', 'signup', 'login-layout', 'signup-layout', 'forgot-password', 'reset-password'].includes(basePath);
 
   // Resetear todos los flags primero
   this.showMainHeader = false;
