@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import { Observable, tap, catchError, throwError, of } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { HttpHeaders } from '@angular/common/http';
+import { timeout } from 'rxjs/operators';
 
 interface User {
   id: number;
@@ -196,27 +197,86 @@ export class AuthService {
     );
   }
 
-resetPassword(token: string, newPassword: string): Observable<{message: string}> {
-  return this.http.patch<{message: string}>(
-    `${this.apiUrl}/resetPassword/${token}`,
- { 
+// // auth.service.ts
+// resetPassword(token: string, newPassword: string): Observable<any> {
+//   // Validación básica del token
+//   if (!token || token.length !== 64) {
+//     return throwError(() => ({
+//       status: 400,
+//       code: 'INVALID_TOKEN',
+//       message: 'Token de recuperación inválido'
+//     }));
+//   }
+
+//   const headers = new HttpHeaders({
+//     'Content-Type': 'application/json',
+//     'X-Request-Source': 'Angular-Reset-Password'
+//   });
+
+//   return this.http.patch(
+//     `${this.apiUrl}/resetPassword/${encodeURIComponent(token)}`,
+//     { 
+//       password: newPassword,
+//       passwordConfirm: newPassword 
+//     },
+//     { 
+//       headers,
+//       observe: 'response' // Para obtener la respuesta completa
+//     }
+//   ).pipe(
+//     timeout(30000), // Timeout de 30 segundos
+//     catchError((error: HttpErrorResponse) => {
+//       console.error('Error en resetPassword:', {
+//         status: error.status,
+//         url: error.url,
+//         error: error.error
+//       });
+
+//       let userMessage = 'Error al cambiar la contraseña';
+//       let errorCode = 'UNKNOWN_ERROR';
+      
+//       if (error.status === 401) {
+//         userMessage = error.error?.message || 'El enlace ha expirado o es inválido';
+//         errorCode = 'TOKEN_EXPIRED_OR_INVALID';
+//       } else if (error.status === 0) {
+//         userMessage = 'Error de conexión con el servidor';
+//         errorCode = 'NETWORK_ERROR';
+//       }
+
+//       return throwError(() => ({
+//         status: error.status,
+//         code: errorCode,
+//         message: userMessage,
+//         details: error.error?.details || {}
+//       }));
+//     })
+//   );
+// }
+// auth.service.ts
+resetPassword(token: string, newPassword: string): Observable<any> {
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/json'
+  });
+
+  return this.http.patch(
+    `${this.apiUrl}/resetPassword/${encodeURIComponent(token)}`,
+    { 
       password: newPassword,
-      passwordConfirm: newPassword // Asegúrate que coincida con el backend
-    }
+      passwordConfirm: newPassword 
+    },
+    { headers }
   ).pipe(
-    catchError(error => {
-      // Mejor manejo de errores
+    catchError((error: HttpErrorResponse) => {
       let errorMessage = 'Error al cambiar la contraseña';
       
-      if (error.error) {
-        errorMessage = error.error.message || 
-                      error.error.error?.message || 
-                      errorMessage;
+      if (error.status === 401) {
+        errorMessage = error.error?.message || 'El enlace ha expirado o es inválido';
       }
 
       return throwError(() => ({
+        status: error.status,
         message: errorMessage,
-        status: error.status || 500
+        details: error.error?.details
       }));
     })
   );

@@ -7,12 +7,15 @@ import { HeaderAdminComponent } from './components/header-admin/header-admin.com
 import { Footer1Component } from './components/footer1/footer1.component';
 import { HeaderClientComponent } from './components/header-client/header-client.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-     ReactiveFormsModule,
+    CommonModule,
+    ReactiveFormsModule,
     RouterModule,
     HeaderComponent,
     BodyComponent,
