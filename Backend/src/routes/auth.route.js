@@ -3,14 +3,13 @@ const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
-// Autenticación
 router.post('/signup', authController.signup);
-router.post('/login', authController.login);
-router.post('/logout', authController.logout);
+router.post('/login', authController.login); 
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
 // Ruta protegida 
-router.get('/userinfo', authMiddleware.authenticate, authController.getCurrentUser);
-
+router.use(authMiddleware.authenticate);
+router.get('/userinfo', authController.getCurrentUser);
+router.post('/logout', authController.logout);
 module.exports = router;

@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '.env' });
 const express = require('express');
 const cors = require('cors');
+
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
@@ -8,6 +9,8 @@ const connectDB = require('./Database');
 connectDB();
 
 const app = express();
+const jsonMiddleware = express.json();
+app.use(express.urlencoded({ extended: true }));
 
 // Settings
 app.set('port', process.env.PORT || 3000);
@@ -16,7 +19,7 @@ app.set('port', process.env.PORT || 3000);
 app.use(cors({
   origin: 'http://localhost:4200',
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-data']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-data','X-Request-Source','X-Bypass-Interceptor']
 }));
 
 
@@ -27,11 +30,10 @@ const limiter = rateLimit({
 
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: true }));
 
 // IMPORTANTE: Elimina el jsonMiddleware global
 // Solo aplica express.json() a rutas específicas
-const jsonMiddleware = express.json();
+
 
 // Routers
 const productRouter = require('./routes/product.route');

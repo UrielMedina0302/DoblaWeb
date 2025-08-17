@@ -37,7 +37,12 @@ const userSchema = new mongoose.Schema({
     role:{
         type: String,
         enum: ['user', 'admin'],
-        default: 'user'
+        default: 'admin'
+    },   passwordResetToken: String,
+    passwordResetExpires: Date,
+    plainResetToken: {
+        type: String,
+        select: false // No se incluye en queries por defecto
     }
     },{
         versionKey: false,// Desactiva el campo __v de Mongoose
@@ -66,8 +71,7 @@ userSchema.methods.generateAuthToken = function() {
   // Compara la contraseña ingresada (candidatePassword) con el hash almacenado
   return await bcrypt.compare(candidatePassword, this.password);
 };
-
-    // Método para crear token de reset de contraseña
+// Método para crear token de reset
 userSchema.methods.createPasswordResetToken = function() {
     const resetToken = crypto.randomBytes(32).toString('hex');
     
@@ -76,7 +80,14 @@ userSchema.methods.createPasswordResetToken = function() {
         .update(resetToken)
         .digest('hex');
     
-    this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutos
+    // Aumentar tiempo de expiración a 24 horas
+    this.passwordResetExpires = Date.now() + 24 * 60 * 60 * 1000; 
+    
+    console.log('🔑 Token generado:', {
+        plain: resetToken,
+        hashed: this.passwordResetToken,
+        expires: new Date(this.passwordResetExpires)
+    });
     
     return resetToken;
 };

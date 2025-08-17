@@ -141,20 +141,22 @@ exports.logout = (req, res) => {
     message: 'Sesión cerrada exitosamente'
  });
 };
-
 exports.forgotPassword = async (req, res, next) => {
-  try {
-    // Validación mejorada del email
-    if (!req.body?.email) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Por favor proporcione un email válido'
-      });
-    }
-
-    const user = await User.findOne({ email: req.body.email });
+    let user; // Declarar fuera del try para poder limpiar en catch
     
-    // Respuesta genérica por seguridad
+    try {
+        console.log('[FORGOT_PASSWORD] Iniciando proceso con body:', req.body);
+
+        // Validación de email
+        if (!req.body?.email) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Por favor proporcione un email válido'
+            });
+        }
+
+        // Buscar usuario
+         user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(200).json({
         status: 'success',
@@ -162,119 +164,125 @@ exports.forgotPassword = async (req, res, next) => {
       });
     }
 
-    // Generar token de reset
-    const resetToken = user.createPasswordResetToken();
-    await user.save({ validateBeforeSave: false });
-
-    console.log('🔑 Token de reset generado:', resetToken);
-    console.log('🔗 Enlace de prueba:', `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`);
-
-    // URL de reset (temporalmente al backend)
-    const resetURL = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
-
-    try {
-      // Envío de email mejorado
-      await new sendEmail(user, resetURL).sendPasswordReset();
-      
-      res.status(200).json({
-        status: 'success',
-        message: 'Enlace de recuperación enviado al email'
-      });
-    } catch (err) {
-      // Limpiar token en caso de error
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
+        // Generar y guardar token
+        const resetToken = user.createPasswordResetToken();
+        
+        // Guardar usuario (sin validar otros campos)
+         try {
       await user.save({ validateBeforeSave: false });
-
-      console.error('Error al enviar email:', err); // Log para diagnóstico
-      
-      return res.status(500).json({
-        status: 'error',
-        message: 'Error al enviar el email. Por favor intente nuevamente más tarde.'
-      });
+    } catch (saveError) {
+      console.error('Error al guardar, reintentando...', saveError);
+      await user.save({ validateBeforeSave: false });
     }
-  } catch (error) {
-    next(error);
-  }
+        console.log('[FORGOT_PASSWORD] Token guardado en BD para:', user.email);
+
+        // Enviar email
+        const frontendResetURL = `http://localhost:4200/reset-password?token=${resetToken}`;
+        await new sendEmail(user, frontendResetURL).sendPasswordReset();
+        
+        res.status(200).json({
+            status: 'success',
+            message: 'Enlace de recuperación enviado al email'
+        });
+
+    } catch (error) {
+        console.error('[FORGOT_PASSWORD] Error crítico:', error);
+        
+        // Revertir cambios si hay error y el usuario existe
+        if (user) {
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save({ validateBeforeSave: false });
+        }
+
+        res.status(500).json({
+            status: 'error',
+            message: 'Error al procesar la solicitud'
+        });
+    }
 };
 
-exports.resetPassword = async (req, res, next) => {
+// En tu controlador de backend (Node.js/Express)
+exports.resetPassword = async (req, res) => {
   try {
-    // 1. Obtener token de los parámetros de la URL
     const { token } = req.params;
-     console.log('🔍 Token recibido para reset:', token); // Mostrar token recibido
     const { password, passwordConfirm } = req.body;
 
-    // 2. Validaciones
-    if (!token) {
+    console.log('🔍 Token recibido:', token);
+    
+    // 1. Validación básica del token
+    if (!token || typeof token !== 'string') {
       return res.status(400).json({
         status: 'error',
-        message: 'Token no proporcionado en la URL'
+        code: 'INVALID_TOKEN',
+        message: 'Token de recuperación inválido'
       });
     }
 
-    if (!password || !passwordConfirm) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Provea contraseña y confirmación'
-      });
-    }
-
-    if (password !== passwordConfirm) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Las contraseñas no coinciden'
-      });
-    }
-
-    if(!password||!password.lenght<8){
-        return res.status(400).json({   
-        status: 'error',
-        message: 'La contraseña debe tener al menos 8 caracteres'
-        })
-    }
-    // 3. Hashear el token para comparar con DB
-    const hashedToken = crypto
-      .createHash('sha256')
+    // 2. Hashear el token
+    const hashedToken = crypto.createHash('sha256')
       .update(token)
       .digest('hex');
 
-    // 4. Buscar usuario
-    const user = await User.findOne({
+    console.log('🔐 Token hasheado:', hashedToken);
+
+    // 3. Buscar usuario con token válido (con timeout)
+      const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() }
     });
 
     if (!user) {
+      // Consulta adicional para diagnóstico
+      const expiredUser = await User.findOne({
+        passwordResetToken: hashedToken
+      }).select('passwordResetExpires');
+      
+      return res.status(401).json({
+        status: 'error',
+        code: 'TOKEN_EXPIRED_OR_INVALID',
+        message: 'El enlace de recuperación ha expirado o es inválido',
+        details: {
+          tokenLength: token.length,
+          storedTokenExists: !!expiredUser,
+          tokenExpired: expiredUser?.passwordResetExpires < Date.now(),
+          currentTime: new Date()
+        }
+      });
+    }
+
+    // 4. Validar contraseñas
+    if (password !== passwordConfirm) {
       return res.status(400).json({
         status: 'error',
-        message: 'Token inválido o expirado. Solicite un nuevo enlace.'
+        code: 'PASSWORD_MISMATCH',
+        message: 'Las contraseñas no coinciden'
       });
     }
 
     // 5. Actualizar contraseña
     user.password = password;
-    user.passwordConfirm = passwordConfirm;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    user.passwordChangedAt = Date.now();
     
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
-    // 6. Respuesta exitosa
+    console.log('✅ Contraseña actualizada para:', user.email);
+
+    // 6. Responder inmediatamente
     res.status(200).json({
       status: 'success',
-      message: '¡Contraseña actualizada!'
+      message: '¡Contraseña actualizada correctamente!'
     });
 
-    // 7. Opcional: Enviar email de confirmación
-    await new Email(user, '/login').sendPasswordChanged();
-
   } catch (error) {
-    console.error('Error en resetPassword:', error);
+    console.error('❌ Error en resetPassword:', error);
+    
+    // Asegurar que siempre se envíe una respuesta
     res.status(500).json({
       status: 'error',
-      message: 'Error al actualizar la contraseña',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: 'Error interno al procesar la solicitud'
     });
   }
 };
