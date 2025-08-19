@@ -1,98 +1,3 @@
-// const nodemailer = require('nodemailer');
-// const pug = require('pug');
-// const htmlToText = require('html-to-text');
-// const path = require('path');
-// require('dotenv').config();
-
-// module.exports = class Email {
-//   constructor(user, resetURL) {
-//     this.to = user.email;
-//     this.firstName = user.name.split(' ')[0];
-//     this.resetURL = resetURL;
-//     this.from = `Pruebas DoblaWeb <${process.env.EMAIL_FROM || 'no-reply@doblaweb.com'}>`;
-//   }
-
-//   // Configuración mejorada con validación
-//   newTransport() {
-//     if (!process.env.MAILTRAP_HOST || !process.env.MAILTRAP_USER || !process.env.MAILTRAP_PASS) {
-//       throw new Error('Configuración de Mailtrap incompleta en variables de entorno');
-//     }
-
-//     return nodemailer.createTransport({
-//       host: process.env.MAILTRAP_HOST,
-//       port: process.env.MAILTRAP_PORT || 2525,
-//       auth: {
-//         user: process.env.MAILTRAP_USER,
-//         pass: process.env.MAILTRAP_PASS
-//       },
-//       logger: true,
-//       debug: true,
-//       connectionTimeout: 5000 // 5 segundos timeout
-//     });
-//   }
-
-//   // Renderizado con manejo de errores
-//   async renderTemplate(template, data) {
-//     try {
-//       const templatePath = path.join(__dirname, '../views/emails', `${template}.pug`);
-//       return pug.renderFile(templatePath, {
-//         ...data,
-//         appName: 'DoblaWeb',
-//         currentYear: new Date().getFullYear()
-//       });
-//     } catch (err) {
-//       console.error(`Error renderizando plantilla ${template}:`, err);
-//       throw new Error('Error al procesar la plantilla del email');
-//     }
-//   }
-
-//   // Envío con mejor manejo de errores
-//   async send(template, subject) {
-//     try {
-//       // Verificar datos mínimos
-//       if (!this.to || !this.resetURL) {
-//         throw new Error('Faltan datos esenciales para enviar el email');
-//       }
-
-//       const html = await this.renderTemplate(template, {
-//         firstName: this.firstName,
-//         resetURL: this.resetURL,
-//         subject
-//       });
-
-//       const mailOptions = {
-//         from: this.from,
-//         to: this.to,
-//         subject,
-//         html,
-//         text: htmlToText.convert(html),
-//         headers: { 
-//           'X-Mailtrap-Test': 'true',
-//           'X-App': 'DoblaWeb'
-//         }
-//       };
-
-//       // Crear transporte y enviar
-//       const transport = this.newTransport();
-//       await transport.verify(); // Verificar conexión primero
-//       const info = await transport.sendMail(mailOptions);
-      
-//       console.log(`Email enviado a ${this.to}:`, info.messageId);
-//       return info;
-      
-//     } catch (error) {
-//       console.error('Error en Email.send():', error);
-//       throw error; // Relanzar para manejo en el controlador
-//     }
-//   }
-
-//   async sendPasswordReset() {
-//     return this.send(
-//       'passwordReset',
-//       'Restablecimiento de contraseña'
-//     );
-//   }
-// };
 const nodemailer = require('nodemailer');
 const pug = require('pug');
 const htmlToText = require('html-to-text');
@@ -101,9 +6,14 @@ require('dotenv').config();
 
 module.exports = class Email {
   constructor(user, url, templateData = {}) {
+    // Validación básica del destinatario
+    if (!user || !user.email) {
+      throw new Error('Se requiere un usuario con email válido');
+    }
+
     this.to = user.email;
-    this.firstName = user.name.split(' ')[0];
-    this.url = url;
+    this.firstName = user.name ? user.name.split(' ')[0] : 'Usuario';
+    this.url = url || '';
     this.from = `DoblaWeb <${process.env.EMAIL_FROM || 'no-reply@doblaweb.com'}>`;
     this.templateData = { ...templateData, firstName: this.firstName };
   }
@@ -163,18 +73,14 @@ module.exports = class Email {
   // Método principal para enviar emails
   async send(template, subject) {
     try {
-      // Validación de datos esenciales
-      if (!this.to) throw new Error('Destinatario no especificado');
-      if (!template) throw new Error('Plantilla no especificada');
+      // Validación reforzada
+      if (!this.to || !this.to.includes('@')) {
+        throw new Error(`Destinatario inválido: ${this.to}`);
+      }
 
-      // Generar contenido HTML y texto
       const html = await this.renderTemplate(template);
-      const text = htmlToText.convert(html, {
-        wordwrap: 130,
-        hideLinkHrefIfSameAsText: true
-      });
+      const text = htmlToText.convert(html);
 
-      // Configuración del email
       const mailOptions = {
         from: this.from,
         to: this.to,
@@ -182,22 +88,26 @@ module.exports = class Email {
         html,
         text,
         headers: {
-          'X-App': 'DoblaWeb',
-          'X-App-Version': process.env.npm_package_version || '1.0.0'
+          'X-App': 'DoblaWeb'
         }
       };
 
-      // Enviar email
+      console.log('Preparando envío a:', mailOptions.to);
+
       const transport = this.newTransport();
-      await transport.verify(); // Verificar conexión primero
+      await transport.verify();
       const info = await transport.sendMail(mailOptions);
       
       console.log(`✉️ Email enviado a ${this.to} [${info.messageId}]`);
       return info;
       
     } catch (error) {
-      console.error('❌ Error enviando email:', error.message);
-      throw error; // Relanzar para manejo en el controlador
+      console.error('❌ Error en Email.send:', {
+        to: this.to,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
     }
   }
 
@@ -224,4 +134,34 @@ module.exports = class Email {
       }
     );
   }
-};
+
+async sendEmployeeCodeRequest(employeeEmail, code, approvalUrl) {
+  // 3️⃣ Verificación antes de enviar
+  console.log("✉️ Datos para el email:", {
+    email: employeeEmail,
+    code: code,
+    approvalUrl: approvalUrl
+  });
+
+  return this.send(
+    'employeeCodeRequest',
+    'Solicitud de Código de Empleado - Aprobación Requerida',
+    {
+      email: employeeEmail, // Estos deben coincidir con #{email} en PUG
+      code: code,
+      approvalUrl: approvalUrl
+    }
+  );
+}
+
+async sendEmployeeCodeConfirmation(code) {
+  return this.send(
+    'employeeCodeConfirmation',
+    'Tu Código de Registro - DoblaWeb',
+    {
+      code
+    }
+  );
+}
+}
+module.exports.sendEmail = (user, url) => new module.exports(user, url).sendPasswordReset();

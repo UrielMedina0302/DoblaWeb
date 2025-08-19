@@ -21,78 +21,93 @@ const cleanUploadedFiles = (files) => {
 
 exports.createProduct = async (req, res, next) => {
   try {
-    let productData = {
+    // Validaciones básicas
+    if (!req.body.name || !req.body.description) {
+      throw createError(400, 'Nombre y descripción son requeridos');
+    }
+
+    const productData = {
       name: req.body.name,
       description: req.body.description,
-      isActive: req.body.isActive === 'true'
+      isActive: req.body.isActive === 'true',
+      images: []
     };
 
     // Procesar imágenes si existen
     if (req.files && req.files.length > 0) {
       productData.images = req.files.map(file => ({
-        path: file.path,
-        filename: file.filename,
-        mimetype: file.mimetype,
-        size: file.size
-      }));
-    } else if (req.body.images) {
-      // Para JSON con URLs de imágenes existentes
-      productData.images = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+  path: file.path,
+  filename: file.filename,
+ url: `/api/product/image/${file.filename}` // Ruta relativa consistente
+}));
     }
 
-    // Validación mejorada
-    if (!productData.name || !productData.description) {
-      cleanUploadedFiles(req.files);
-      throw createError(400, 'Nombre y descripción son requeridos');
-    }
-
-    // Validar longitud máxima
-    if (productData.name.length > 100) {
-      cleanUploadedFiles(req.files);
-      throw createError(400, 'El nombre no puede exceder los 100 caracteres');
-    }
-
-    // Guardar en BD
-    const newProduct = await Product.create(productData);
-
+    const newProduct = await productDao.createProduct(productData);
     res.status(201).json({
       success: true,
       data: newProduct
     });
 
   } catch (error) {
-    cleanUploadedFiles(req.files);
+    // Limpiar archivos subidos en caso de error
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        try {
+          fs.unlinkSync(file.path);
+        } catch (cleanupError) {
+          console.error('Error limpiando archivo:', cleanupError);
+        }
+      });
+    }
     next(error);
   }
 };
 
 exports.updateProduct = async (req, res, next) => {
-  try {
-    const id = req.params.product_id;
-    const productData = req.body;
+    try {
+        const id = req.params.product_id;
+        
+        // Validación básica
+        if (!req.body || Object.keys(req.body).length === 0) {
+            throw createError(400, 'Datos de actualización requeridos');
+        }
 
-    // Validación básica
-    if (!productData || Object.keys(productData).length === 0) {
-      throw createError(400, 'Datos de actualización requeridos');
+        // Preparar datos de actualización
+        const updateData = { ...req.body };
+
+        // Procesar imágenes si hay archivos nuevos
+         if (req.files && req.files.length > 0) {
+      const uploadedFiles = req.files.map(file => ({
+        filename: file.filename,
+        originalname: file.originalname,
+        path: file.path,
+        url: `${req.protocol}://${req.get('host')}/api/products/image/${file.filename}`,
+        size: file.size,
+        mimetype: file.mimetype
+      }));
+      
+      updates.images = [...updates.images || [], ...uploadedFiles];
     }
 
-    const updatedProduct = await productDao.updateProduct(id, productData);
+        // Actualizar el producto en la base de datos
+        const updatedProduct = await productDao.updateProduct(id, updateData);
 
-    if (!updatedProduct) {
-      throw createError(404, 'Producto no encontrado');
+        if (!updatedProduct) {
+            throw createError(404, 'Producto no encontrado');
+        }
+
+        res.status(200).json({
+            success: true,
+            data: updatedProduct
+        });
+
+    } catch (error) {
+        // Limpiar archivos subidos en caso de error
+        if (req.files && req.files.length > 0) {
+            cleanUploadedFiles(req.files);
+        }
+        next(error);
     }
-
-    res.status(200).json({
-      success: true,
-      data: {
-        message: "Producto actualizado correctamente",
-        product: updatedProduct
-      }
-    });
-
-  } catch (error) {
-    next(error);
-  }
 };
 
 exports.getAllProducts = async (req, res, next) => {

@@ -31,14 +31,48 @@ exports.getAllProducts = async () => {// Esta función obtiene todos los product
         console.error("Error al obtener todos los productos", error.message);
     }
 };
-exports.updateProduct = async (id, productData) => {// Esta función recibe el ID del producto y los nuevos datos del producto y lo actualiza en la base de datos
+exports.updateProduct = async (id, productData) => {
     try {
-        return await Product.findByIdAndUpdate(id, productData, { new: true, runValidators: true })//.populate('createdBy','email'); // Utiliza populate para obtener el email del usuario que creó el producto
-        // El parámetro { new: true } devuelve el documento actualizado
-        // El parámetro { runValidators: true } asegura que se apliquen las validaciones del esquema al actualizar el producto
+        // Validación básica del ID
+        if (!id || typeof id !== 'string') {
+            throw new Error('ID de producto inválido');
+        }
+
+        // Clonar los datos para no modificar el objeto original
+        const updateData = { ...productData };
+
+        // Si hay nuevas imágenes, procesarlas
+        if (updateData.images && Array.isArray(updateData.images)) {
+            // Mantener las imágenes existentes si no se especifica reemplazo
+            if (!updateData.replaceImages) {
+                const existingProduct = await Product.findById(id).select('images');
+                if (existingProduct && existingProduct.images) {
+                    updateData.images = [...existingProduct.images, ...updateData.images];
+                }
+            }
+            
+            // Limitar a 5 imágenes como máximo
+            updateData.images = updateData.images.slice(0, 5);
+        }
+
+        // Actualizar el producto
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { 
+                new: true, 
+                runValidators: true 
+            }
+        );
+
+        if (!updatedProduct) {
+            throw new Error('Producto no encontrado');
+        }
+
+        return updatedProduct;
         
     } catch (error) {
-        console.error("Error al actualizar el producto", error.message);
+        console.error("Error al actualizar el producto:", error.message);
         throw error; // Propagar el error para manejarlo en el controlador
     }
 };

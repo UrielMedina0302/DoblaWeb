@@ -1,0 +1,61 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    title Solicitud de Código - DoblaWeb
+  body(style="font-family: Arial, sans-serif;")
+    div(style="max-width: 600px; margin: 0 auto; padding: 20px;")
+      h2(style="color: #2c3e50;") Solicitud de Registro de Empleado
+      
+      p Se ha recibido una solicitud de registro con los siguientes datos:
+      
+      div(style="background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 5px;")
+        p(style="margin: 10px 0;") 
+          strong Email: 
+          span(style="color: #2c3e50;") #{email}
+        p(style="margin: 10px 0;") 
+          strong Código: 
+          span(style="font-weight: bold; color: #2c3e50;") #{code}
+      
+      button(
+        id="approveBtn"
+        style="display: inline-block; background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 10px 0; font-size: 16px;"
+        data-email=email
+        data-code=code
+      ) APROBAR CÓDIGO
+      
+      p(style="font-size: 12px; color: #777;") Esta solicitud expirará en 15 minutos.
+
+    script.
+      document.getElementById('approveBtn').addEventListener('click', async function() {
+        const btn = this;
+        const email = btn.dataset.email;
+        const code = btn.dataset.code;
+        
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+        btn.style.opacity = '0.7';
+        
+        try {
+          const response = await fetch('/api/auth/approve-employee-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, code })
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.message || 'Error del servidor');
+          }
+          
+          alert(result.message || '✅ Código aprobado exitosamente');
+        } catch (error) {
+          console.error('Error:', error);
+          alert('❌ Error: ' + error.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'APROBAR CÓDIGO';
+          btn.style.opacity = '1';
+        }
+      });

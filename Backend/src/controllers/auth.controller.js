@@ -3,6 +3,7 @@ const crypto = require('crypto'); // Importa el módulo crypto para generar toke
 const sendEmail = require('../utils/email.util.js'); // Importa la función para enviar correos electrónicos
 const { CreateSendToken} = require('../utils/auth.util.js'); // Importa la función para crear y enviar el token
 const jwt = require ('jsonwebtoken')
+const Email = require('../utils/email.util'); // Asegúrate que la ruta sea correcta
 
 exports.signup = async (req, res, next) => {// Controlador para registrar un nuevo usuario
     try {
@@ -285,4 +286,124 @@ exports.resetPassword = async (req, res) => {
       message: 'Error interno al procesar la solicitud'
     });
   }
+};
+
+// Enviar código al empleado (llamado cuando la empresa hace clic en el botón)
+exports.sendCodeRequest = async (req, res) => {
+  try {
+    const { employeeEmail, code } = req.body; // Asegúrate que estos nombres coincidan con tu formulario
+    
+    // 1️⃣ Verificación en consola del servidor
+    console.log("📤 Datos recibidos para la plantilla:", {
+      email: employeeEmail, 
+      code: code
+    });
+
+    // 2️⃣ Renderizado (aquí es donde se pasan los datos a PUG)
+    res.render('employeeCodeRequest', {
+      email: employeeEmail, // Asegúrate que coincida con #{email} en PUG
+      code: code            // Asegúrate que coincida con #{code} en PUG
+    });
+
+  } catch (error) {
+    console.error("❌ Error al renderizar plantilla:", error);
+    res.status(500).send("Error interno");
+  }
+};
+
+// Almacén temporal para códigos (en producción usa Redis o DB)
+const employeeCodes = new Map();
+exports.requestEmployeeCode = async (req, res) => {
+  const { email } = req.body;
+  const code = crypto.randomInt(100000, 999999).toString();
+  const expirationTime = Date.now() + 15 * 60 * 1000;
+
+  employeeCodes.set(email, { code, expiresAt: expirationTime });
+
+  try {
+const approvalUrl = `${process.env.API_URL}/api/auth/approve-employee-code?email=${encodeURIComponent(email)}&code=${code}`;    
+    // Enviar al administrador
+    await new Email(
+      { email: 'doblaceros_laminados@hotmail.com', name: 'Administrador' },
+      approvalUrl
+    ).sendEmployeeCodeRequest(
+      email, // Correo del empleado
+      code,  // Código generado
+      approvalUrl
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error enviando email:', error);
+    res.status(500).json({ 
+      error: 'Error al procesar la solicitud',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Nuevo endpoint para aprobar y enviar al empleado
+exports.approveEmployeeCode = async (req, res) => {
+  try {
+    const { email, code } = req.body; // Cambiado a req.body
+
+    // Validación reforzada
+    if (!email || !code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email y código son requeridos'
+      });
+    }
+
+    // Verificación del código
+    const storedData = employeeCodes.get(email);
+    if (!storedData || storedData.code !== code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Código inválido o expirado'
+      });
+    }
+
+    // Envío de email de confirmación
+    await new Email(
+      { email, name: storedData.name || 'Empleado' },
+      `${process.env.FRONTEND_URL}/signup?code=${code}`
+    ).sendEmployeeCodeConfirmation(code);
+
+    // Limpieza del código usado
+    employeeCodes.delete(email);
+
+    return res.json({
+      success: true,
+      message: 'Código aprobado y notificación enviada',
+      registrationLink: `${process.env.FRONTEND_URL}/signup?code=${code}`
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+exports.verifyEmployeeCode = async (req, res) => {
+  const { email, code } = req.body;
+
+  // Buscar código almacenado
+  const storedData = employeeCodes.get(email);
+
+  if (!storedData || storedData.code !== code) {
+    return res.json({ isValid: false });
+  }
+
+  // Verificar expiración
+  if (storedData.expiresAt < Date.now()) {
+    employeeCodes.delete(email);
+    return res.json({ isValid: false });
+  }
+
+  // Código válido
+  employeeCodes.delete(email);
+  res.json({ isValid: true });
 };

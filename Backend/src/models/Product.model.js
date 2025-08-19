@@ -1,30 +1,38 @@
-const mongoose = require('mongoose'); //Se importa moongose para poder trabajar con mongoDB
-const {Schema} = mongoose; //Se importa el esquema de mongoose para poder definir el modelo de producto
+const mongoose = require('mongoose');
+const {Schema} = mongoose;
 
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true, // Este campo es obligatorio
-        trim: true // Elimina espacios en blanco al inicio y al final
+        required: true,
+        trim: true,
+        maxlength: 100 // Añade validación de longitud máxima
     },
     description: {
         type: String,
         required: true,
-        trim: true// Elimina espacios en blanco al inicio y al final
+        trim: true
     },
     images: [{
-        type: String,
-        required: true,
-        }],
-    isActive:{
+        path: {
+            type: String,
+            required: true
+        },
+        filename: {
+            type: String,
+            required: true
+        },
+        mimetype: String,
+        size: Number,
+        url: String // URL pública accesible
+    }],
+    isActive: {
         type: Boolean,
-        default: true // Por defecto, el producto está activo
+        default: true
     }
-    },{
-        versionKey: false,// Desactiva el campo __v de Mongoose
-        timestamps: true // Agrega campos createdAt y updatedAt automáticamente
-    
-    });
+}, {
+    versionKey: false,
+    timestamps: true
+});
 
-// Exportar el modelo de producto para poder usarlo en otras partes de la aplicación
 module.exports = mongoose.models.Product || mongoose.model('Product', productSchema);
