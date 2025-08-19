@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import { environment } from '../../../environments/environment';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -11,7 +11,7 @@ interface Product {
   _id: string;
   name: string;
   description: string;
-  images: string[];
+  images: any[];
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -20,13 +20,13 @@ interface Product {
 @Component({
   selector: 'app-producto-admin',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [ReactiveFormsModule, CommonModule, FormsModule, DatePipe],
   templateUrl: './producto-admin.component.html',
   styleUrls: ['./producto-admin.component.css']
 })
 export class ProductoAdminComponent implements OnInit {
   showModal = false;
-  modalTitle = '';
+  showDeleteConfirmation = false;
   currentAction: 'add' | 'edit' = 'add';
   productForm: FormGroup;
   products: Product[] = [];
@@ -35,6 +35,8 @@ export class ProductoAdminComponent implements OnInit {
   previewUrls: string[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+  errorDismissible = true;
+  productToDelete: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -44,14 +46,19 @@ export class ProductoAdminComponent implements OnInit {
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
-      images: [[]]
+      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
     });
   }
 
   ngOnInit(): void {
     this.verifyAuthentication();
     this.loadProducts();
+  }
+
+  truncateDescription(description: string, limit: number = 100): string {
+    if (!description) return '';
+    if (description.length <= limit) return description;
+    return `${description.substring(0, limit)}...`;
   }
 
   private verifyAuthentication(): void {
@@ -67,43 +74,74 @@ export class ProductoAdminComponent implements OnInit {
     this.errorMessage = null;
     
     this.productService.getProducts().subscribe({
-      next: (response: any) => {
-        try {
-          if (!Array.isArray(response)) {
-            throw new Error('Formato de respuesta inválido del servidor');
-          }
-
-          this.products = response.map((item: any) => ({
-            _id: item._id || '',
-            name: item.name || '',
-            description: item.description || '',
-            images: Array.isArray(item.images) ? item.images : [],
-            isActive: Boolean(item.isActive),
-            createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
-            updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined
-          }));
-        } catch (error) {
-          console.error('Error procesando productos:', error);
-          this.errorMessage = 'Error al procesar los datos del servidor';
-        } finally {
-          this.isLoading = false;
-        }
+      next: (products: Product[]) => {
+        this.products = products;
+        this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
-        this.handleErrorResponse(err, 'cargando productos');
+        this.handleServiceError(err, 'cargar productos');
+        this.isLoading = false;
       }
     });
+  }
+
+getProductImage(product: Product): string {
+  if (!product.images || product.images.length === 0) {
+    return 'assets/default-product.png';
+  }
+
+  const firstImage = product.images[0];
+  
+  // Caso 1: Es un string (nombre de archivo)
+  if (typeof firstImage === 'string') {
+    return `${environment.apiUrl}/api/products/image/${encodeURIComponent(firstImage)}`;
+  }
+  
+  // Caso 2: Tiene propiedad 'filename'
+  if (firstImage.filename) {
+    return `${environment.apiUrl}/api/products/image/${encodeURIComponent(firstImage.filename)}`;
+  }
+  
+  // Caso 3: Tiene propiedad 'url' completa
+  if (firstImage.url) {
+    return firstImage.url;
+  }
+  
+  return 'assets/default-product.png';
+}
+
+  handleImageError(event: Event): void {
+  const target = event.target as HTMLImageElement;
+  target.src = 'assets/img/default.jpg'; // imagen por defecto
+}
+
+
+  getFullImageUrl(image: any): string {
+    if (!image) return 'assets/default-product.png';
+    
+    if (typeof image === 'string') {
+      return image.startsWith('http') ? image : `${environment.apiUrl}/${image}`;
+    }
+    
+    if (image.url) return image.url;
+    
+    if (image.path) {
+      return image.path.startsWith('http') ? image.path : 
+             `${environment.apiUrl}/${image.path.replace(/\\/g, '/')}`;
+    }
+    
+    return 'assets/default-product.png';
   }
 
   openModal(action: 'add' | 'edit', productId: string | null = null): void {
     if (!this.authService.isAdmin()) {
       this.errorMessage = 'Se requieren privilegios de administrador';
+      this.errorDismissible = true;
       return;
     }
 
     this.currentAction = action;
     this.selectedProductId = productId;
-    this.modalTitle = action === 'add' ? 'Agregar Producto' : 'Editar Producto';
     this.showModal = true;
     this.resetModalState();
 
@@ -115,7 +153,6 @@ export class ProductoAdminComponent implements OnInit {
   private resetModalState(): void {
     this.selectedFiles = [];
     this.previewUrls = [];
-    this.errorMessage = null;
     this.productForm.reset();
   }
 
@@ -130,86 +167,92 @@ export class ProductoAdminComponent implements OnInit {
     }
   }
 
-  onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  
-  if (!input.files || input.files.length === 0) {
-    return;
-  }
+  handleFileInput(target: EventTarget | null): void {
+    const input = target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-  // Configuración de límites
-  const maxSize = 50 * 1024 * 1024; // 50MB
-  const maxFiles = 5; // Límite de archivos
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']; // Tipos permitidos
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxFiles = 5;
+    const allowedTypes = ['image/jpeg', 'image/png'];
 
-  // Convertir FileList a array
-  const files = Array.from(input.files);
-
-  // Validar cantidad de archivos
-  if (files.length > maxFiles) {
-    this.errorMessage = `Máximo ${maxFiles} archivos permitidos`;
-    input.value = ''; // Limpiar selección
-    return;
-  }
-
-  // Validar tamaño y tipo
-  const invalidFiles = files.filter(file => {
-    return file.size > maxSize || !allowedTypes.includes(file.type);
-  });
-
-  if (invalidFiles.length > 0) {
-    this.errorMessage = invalidFiles
-      .map(file => {
-        if (file.size > maxSize) {
-          return `${file.name}: Supera el límite de 50MB`;
-        } else {
-          return `${file.name}: Tipo de archivo no permitido`;
-        }
-      })
-      .join(', ');
+    const files = Array.from(input.files);
     
-    input.value = ''; // Limpiar selección
-    return;
-  }
+    if (files.length > maxFiles) {
+      this.errorMessage = `Máximo ${maxFiles} imágenes permitidas`;
+      this.errorDismissible = true;
+      input.value = '';
+      return;
+    }
 
-  // Si todo está bien, procesar archivos
-  this.selectedFiles = files.slice(0, maxFiles);
-  this.generateImagePreviews();
-  
-  // Opcional: Mostrar mensaje de éxito
-  this.errorMessage = null;
-  console.log('Archivos seleccionados válidos:', this.selectedFiles);
-}
+    const invalidFiles = files.filter(file => 
+      file.size > maxSize || !allowedTypes.includes(file.type)
+    );
+
+    if (invalidFiles.length > 0) {
+      this.errorMessage = invalidFiles.map(file => 
+        file.size > maxSize ? 
+        `${file.name}: Supera 5MB` : 
+        `${file.name}: Tipo no permitido`
+      ).join(', ');
+      this.errorDismissible = true;
+      input.value = '';
+      return;
+    }
+
+    this.selectedFiles = files.slice(0, maxFiles);
+    this.generateImagePreviews();
+  }
 
   private generateImagePreviews(): void {
     this.previewUrls = [];
-    this.selectedFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        if (e.target?.result) {
-          this.previewUrls.push(e.target.result as string);
-          this.productForm.get('images')?.setValue(this.previewUrls);
-        }
-      };
-      reader.readAsDataURL(file);
+    const promises = this.selectedFiles.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          if (e.target?.result) {
+            resolve(e.target.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(promises).then(urls => {
+      this.previewUrls = urls;
     });
   }
 
   removeImage(index: number): void {
     this.previewUrls.splice(index, 1);
     this.selectedFiles.splice(index, 1);
-    this.productForm.get('images')?.setValue(this.previewUrls.length > 0 ? this.previewUrls : []);
+  }
+
+  showFieldError(fieldName: string): boolean {
+    const field = this.productForm.get(fieldName);
+    return field ? (field.invalid && (field.touched || field.dirty)) : false;
+  }
+
+  showImageError(): boolean {
+    return this.currentAction === 'add' && this.selectedFiles.length === 0;
   }
 
   submitForm(): void {
     if (this.productForm.invalid) {
       this.markFormGroupTouched(this.productForm);
-      this.errorMessage = 'Por favor complete todos los campos requeridos';
+      this.errorMessage = 'Por favor complete todos los campos requeridos correctamente';
+      this.errorDismissible = true;
+      return;
+    }
+
+    if (this.currentAction === 'add' && this.selectedFiles.length === 0) {
+      this.errorMessage = 'Debes seleccionar al menos una imagen';
+      this.errorDismissible = true;
       return;
     }
 
     if (!this.authService.isAdmin()) {
       this.errorMessage = 'Acceso denegado: Se requieren privilegios de administrador';
+      this.errorDismissible = true;
       return;
     }
 
@@ -226,115 +269,141 @@ export class ProductoAdminComponent implements OnInit {
   }
 
   private prepareFormData(): FormData {
-  const formData = new FormData();
-  
-  // Agregar campos básicos
-  formData.append('name', this.productForm.value.name);
-  formData.append('description', this.productForm.value.description);
-  formData.append('isActive', 'true');
+    const formData = new FormData();
+    
+    formData.append('name', this.productForm.value.name);
+    formData.append('description', this.productForm.value.description);
 
-  // Agregar imágenes si existen
-  if (this.selectedFiles.length > 0) {
-    this.selectedFiles.forEach((file, index) => {
-      formData.append(`images`, file, file.name);
-    });
+    if (this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach((file) => {
+        formData.append('images', file, file.name);
+      });
+    }
+
+    return formData;
   }
 
-  return formData;
-}
-
   private createProduct(formData: FormData): void {
-  this.isLoading = true;
-  this.errorMessage = null;
-
-  this.productService.createProduct(formData).subscribe({
-    next: (response) => {
-      console.log('Producto creado:', response);
-      this.handleSuccess('Producto creado exitosamente');
-    },
-    error: (err: HttpErrorResponse) => {
-      console.error('Error completo:', err);
-      this.handleErrorResponse(err, 'creando producto');
-    }
-  });
-}
+    this.productService.createProduct(formData).subscribe({
+      next: () => {
+        this.handleSuccess('Producto creado exitosamente');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.handleErrorResponse(err, 'creando producto');
+      }
+    });
+  }
 
   private updateProduct(formData: FormData): void {
     if (!this.selectedProductId) return;
 
     this.productService.updateProduct(this.selectedProductId, formData).subscribe({
-      next: () => this.handleSuccess('Producto actualizado exitosamente'),
-      error: (err: HttpErrorResponse) => this.handleErrorResponse(err, 'actualizando producto')
+      next: () => {
+        this.handleSuccess('Producto actualizado exitosamente');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.handleErrorResponse(err, 'actualizando producto');
+      }
     });
   }
 
   toggleProductStatus(product: Product): void {
     if (!this.authService.isAdmin()) {
       this.errorMessage = 'Se requieren privilegios de administrador';
+      this.errorDismissible = true;
       return;
     }
 
     const newStatus = !product.isActive;
+    const confirmation = confirm(`¿Estás seguro de querer ${newStatus ? 'activar' : 'desactivar'} este producto?`);
+    
+    if (!confirmation) return;
+
+    this.isLoading = true;
     this.productService.updateProduct(product._id, { isActive: newStatus }).subscribe({
-      next: () => product.isActive = newStatus,
-      error: (err: HttpErrorResponse) => this.handleErrorResponse(err, 'cambiando estado')
+      next: () => {
+        product.isActive = newStatus;
+        this.isLoading = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.handleErrorResponse(err, 'cambiando estado del producto');
+      }
     });
   }
 
-  deleteProduct(productId: string): void {
+  confirmDelete(productId: string): void {
     if (!this.authService.isAdmin()) {
       this.errorMessage = 'Se requieren privilegios de administrador';
+      this.errorDismissible = true;
       return;
     }
 
-    if (confirm('¿Estás seguro de eliminar este producto permanentemente?')) {
-      this.isLoading = true;
-      this.productService.deleteProduct(productId).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.isLoading = false;
-        },
-        error: (err: HttpErrorResponse) => this.handleErrorResponse(err, 'eliminando producto')
-      });
-    }
+    this.productToDelete = productId;
+    this.showDeleteConfirmation = true;
+  }
+
+  cancelDelete(): void {
+    this.productToDelete = null;
+    this.showDeleteConfirmation = false;
+  }
+
+  deleteProduct(): void {
+    if (!this.productToDelete) return;
+
+    this.isLoading = true;
+    this.productService.deleteProduct(this.productToDelete).subscribe({
+      next: () => {
+        this.showDeleteConfirmation = false;
+        this.productToDelete = null;
+        this.loadProducts();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.handleErrorResponse(err, 'eliminando producto');
+        this.showDeleteConfirmation = false;
+      }
+    });
   }
 
   private handleSuccess(message: string): void {
     this.loadProducts();
     this.closeModal();
-    // Aquí podrías agregar un toast notification
+    this.isLoading = false;
     console.log(message);
   }
 
-  private handleErrorResponse(error: HttpErrorResponse, context: string): void {
-    console.error(`Error ${context}:`, error);
-    this.errorMessage = this.getErrorMessage(error);
-    this.isLoading = false;
-
+  private handleServiceError(error: HttpErrorResponse, context: string): void {
+    console.error(`Error al ${context}:`, error);
+    
     if (error.status === 401 || error.status === 403) {
       this.authService.logout();
       this.router.navigate(['/login'], {
         queryParams: { sessionExpired: true }
       });
+      return;
     }
+
+    const errorMessages: {[key: number]: string} = {
+      0: 'Error de conexión con el servidor',
+      400: 'Datos inválidos enviados al servidor',
+      404: 'Recurso no encontrado',
+      409: 'Conflicto: El producto ya existe',
+      500: 'Error interno del servidor'
+    };
+
+    this.errorMessage = errorMessages[error.status] || 
+                       error.error?.message || 
+                       `Error al ${context}. Por favor intente nuevamente.`;
+    this.errorDismissible = true;
+    this.isLoading = false;
+  }
+
+  private handleErrorResponse(error: HttpErrorResponse, context: string): void {
+    this.handleServiceError(error, context);
   }
 
   closeModal(): void {
     this.showModal = false;
     this.resetModalState();
-  }
-
-  getFullImageUrl(imagePath: string): string {
-    if (!imagePath) return 'assets/default-product.png';
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${environment.apiUrl}/${imagePath.replace(/\\/g, '/')}`;
-  }
-
-  private getErrorMessage(error: HttpErrorResponse): string {
-    if (error.status === 0) {
-      return 'Error de conexión con el servidor';
-    }
-    return error.error?.message || error.message || 'Ocurrió un error inesperado';
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

@@ -1,114 +1,200 @@
 <div class="product-admin-container">
   <!-- Loading State -->
   <div *ngIf="isLoading && products.length === 0" class="loading-state">
-    <div class="spinner"></div>
+    <div class="spinner" aria-hidden="true"></div>
     <p>Cargando productos...</p>
   </div>
 
   <!-- Error Message -->
-  <div *ngIf="errorMessage" class="error-message alert alert-danger">
+  <div *ngIf="errorMessage" class="error-message alert alert-danger" role="alert">
     {{ errorMessage }}
+    <button *ngIf="errorDismissible" (click)="errorMessage = null" class="close-error" aria-label="Cerrar mensaje de error">
+      &times;
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && products.length === 0 && !errorMessage" class="empty-state">
+    <p>No hay productos disponibles</p>
+    <button (click)="openModal('add')" class="btn-primary" aria-label="Agregar primer producto">
+      Agregar Primer Producto
+    </button>
   </div>
 
   <!-- Product List -->
-  <div class="product-grid">
-    <div *ngFor="let product of products" class="product-card">
+  <div class="product-grid" *ngIf="!isLoading && products.length > 0">
+    <article *ngFor="let product of products" class="product-card">
       <div class="product-image">
-        <img [src]="product.images && product.images.length > 0 ? getFullImageUrl(product.images[0]) : 'assets/default-product.png'" 
-             [alt]="product.name">
-        <span class="status-badge" [class.active]="product.isActive">
+        <img [src]="getProductImage(product)" 
+     [alt]="product.name" 
+     loading="lazy"
+     (error)="handleImageError($event)">
+        <span class="status-badge" 
+              [class.active]="product.isActive" 
+              [attr.aria-label]="product.isActive ? 'Producto activo' : 'Producto inactivo'">
           {{ product.isActive ? 'Activo' : 'Inactivo' }}
         </span>
       </div>
       <div class="product-info">
         <h3>{{ product.name }}</h3>
-        <p>{{ product.description }}</p>
+        <p class="product-description">{{ truncateDescription(product.description) }}</p>
+        <div class="product-meta">
+          <small>Última actualización: {{ product.updatedAt | date:'mediumDate' }}</small>
+        </div>
         <div class="product-actions">
-          <button (click)="toggleProductStatus(product)" [class.btn-active]="product.isActive">
+          <button (click)="toggleProductStatus(product)" 
+                  [class.btn-warning]="product.isActive" 
+                  [class.btn-success]="!product.isActive"
+                  [attr.aria-label]="product.isActive ? 'Desactivar producto' : 'Activar producto'">
             {{ product.isActive ? 'Desactivar' : 'Activar' }}
           </button>
-          <button (click)="openModal('edit', product._id)">Editar</button>
-          <button (click)="deleteProduct(product._id)" class="btn-delete">Eliminar</button>
+          <button (click)="openModal('edit', product._id)" 
+                  class="btn-info"
+                  aria-label="Editar producto">
+            Editar
+          </button>
+          <button (click)="confirmDelete(product._id)" 
+                  class="btn-danger" 
+                  aria-label="Eliminar producto">
+            Eliminar
+          </button>
         </div>
       </div>
-    </div>
+    </article>
   </div>
 
   <!-- Add Product Button -->
-  <button (click)="openModal('add')" class="add-product-btn btn-primary">
-    <i class="fas fa-plus"></i> Agregar Producto
+  <button *ngIf="products.length > 0" 
+          (click)="openModal('add')" 
+          class="add-product-btn btn-primary" 
+          aria-label="Agregar nuevo producto">
+    <i class="fas fa-plus" aria-hidden="true"></i> Agregar Producto
   </button>
 
   <!-- Product Modal -->
-  <div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-overlay" *ngIf="showModal" role="dialog" aria-modal="true" 
+       [attr.aria-labelledby]="currentAction === 'add' ? 'modal-add-title' : 'modal-edit-title'">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>{{ currentAction === 'add' ? 'Agregar Producto' : 'Editar Producto' }}</h3>
-        <button (click)="closeModal()" class="close-btn">&times;</button>
+        <h3 id="{{currentAction === 'add' ? 'modal-add-title' : 'modal-edit-title'}}">
+          {{ currentAction === 'add' ? 'Agregar Producto' : 'Editar Producto' }}
+        </h3>
+        <button (click)="closeModal()" class="close-btn" aria-label="Cerrar modal">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- Formulario reactivo con ngSubmit -->
         <form [formGroup]="productForm" (ngSubmit)="submitForm()" #form="ngForm">
           <div class="form-group">
-            <label for="name">Nombre*</label>
-            <input 
-              type="text" 
-              id="name" 
-              formControlName="name"
-              [class.invalid]="productForm.get('name')?.invalid && productForm.get('name')?.touched">
-            <small *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
-              Nombre requerido (3-100 caracteres)
+            <label for="product-name">Nombre*</label>
+            <input type="text" 
+                   id="product-name" 
+                   formControlName="name"
+                   [class.invalid]="showFieldError('name')"
+                   aria-describedby="name-help"
+                   required>
+            <small id="name-help" *ngIf="showFieldError('name')" class="error-text">
+              <span *ngIf="productForm.get('name')?.errors?.['required']">Nombre es requerido</span>
+              <span *ngIf="productForm.get('name')?.errors?.['minlength']">
+                Mínimo {{productForm.get('name')?.errors?.['minlength']?.requiredLength}} caracteres
+              </span>
+              <span *ngIf="productForm.get('name')?.errors?.['maxlength']">
+                Máximo {{productForm.get('name')?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
             </small>
           </div>
 
           <div class="form-group">
-            <label for="description">Descripción*</label>
-            <textarea 
-              id="description" 
-              formControlName="description" 
-              rows="3"
-              [class.invalid]="productForm.get('description')?.invalid && productForm.get('description')?.touched"></textarea>
-            <small *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched">
-              Descripción requerida (10-500 caracteres)
+            <label for="product-description">Descripción*</label>
+            <textarea id="product-description" 
+                      formControlName="description" 
+                      rows="4"
+                      [class.invalid]="showFieldError('description')"
+                      aria-describedby="description-help"
+                      required></textarea>
+            <small id="description-help" *ngIf="showFieldError('description')" class="error-text">
+              <span *ngIf="productForm.get('description')?.errors?.['required']">Descripción es requerida</span>
+              <span *ngIf="productForm.get('description')?.errors?.['minlength']">
+                Mínimo {{productForm.get('description')?.errors?.['minlength']?.requiredLength}} caracteres
+              </span>
+              <span *ngIf="productForm.get('description')?.errors?.['maxlength']">
+                Máximo {{productForm.get('description')?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
             </small>
           </div>
 
           <div class="form-group">
-            <label for="images">Imágenes*</label>
-            <input 
-              type="file" 
-              id="images"
-              multiple 
-              (change)="onFileSelected($event)" 
-              accept="image/*"
-              [class.invalid]="selectedFiles.length === 0 && form.submitted">
-            <small>Máximo 5 imágenes (JPEG, PNG)</small>
+            <label for="product-images">Imágenes {{currentAction === 'add' ? '*' : ''}}</label>
+            <input type="file" 
+                   id="product-images"
+                   multiple 
+                  (change)="handleFileInput($any($event).target)"
+                   accept="image/jpeg, image/png"
+                   [class.invalid]="showImageError()"
+                   aria-describedby="images-help">
+            <small id="images-help">Formatos aceptados: JPEG, PNG (Máx. 5MB cada una)</small>
             
-            <div class="image-previews">
+            <div class="image-previews" *ngIf="previewUrls.length > 0">
               <div *ngFor="let url of previewUrls; let i = index" class="image-preview">
-                <img [src]="url" alt="Preview">
-                <button type="button" (click)="removeImage(i)" class="remove-image-btn">
-                  <i class="fas fa-times"></i>
+                <img [src]="url" [alt]="'Vista previa de imagen ' + (i + 1)" loading="lazy">
+                <button type="button" 
+                        (click)="removeImage(i)" 
+                        class="remove-image-btn" 
+                        aria-label="Eliminar imagen">
+                  <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
-            <small *ngIf="selectedFiles.length === 0 && form.submitted" class="error-text">
-              Debes seleccionar al menos una imagen
+            <small *ngIf="showImageError()" class="error-text">
+              {{ currentAction === 'add' ? 'Debes seleccionar al menos una imagen' : 'Selecciona imágenes para actualizar' }}
             </small>
           </div>
 
           <div class="modal-footer">
-            <button type="button" (click)="closeModal()" class="btn-cancel">Cancelar</button>
-            <button 
-              type="submit" 
-              [disabled]="productForm.invalid || isLoading"
-              class="btn-submit">
-              {{ isLoading ? 'Procesando...' : (currentAction === 'add' ? 'Crear' : 'Actualizar') }}
+            <button type="button" 
+                    (click)="closeModal()" 
+                    class="btn-cancel"
+                    [disabled]="isLoading">
+              Cancelar
+            </button>
+            <button type="submit" 
+                    [disabled]="productForm.invalid || isLoading || (currentAction === 'add' && selectedFiles.length === 0)"
+                    class="btn-submit"
+                    [attr.aria-busy]="isLoading">
+              <span *ngIf="!isLoading">{{ currentAction === 'add' ? 'Crear' : 'Actualizar' }}</span>
+              <span *ngIf="isLoading">Procesando...</span>
             </button>
           </div>
         </form>
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirmation" role="dialog" aria-modal="true">
+    <div class="modal-content confirmation-modal">
+      <div class="modal-header">
+        <h3>Confirmar Eliminación</h3>
+        <button (click)="cancelDelete()" class="close-btn" aria-label="Cancelar eliminación">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este producto permanentemente?</p>
+        <p class="warning-text">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" 
+                (click)="cancelDelete()" 
+                class="btn-cancel"
+                [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button type="button" 
+                (click)="deleteProduct()" 
+                class="btn-danger"
+                [disabled]="isLoading"
+                [attr.aria-busy]="isLoading">
+          <span *ngIf="!isLoading">Eliminar</span>
+          <span *ngIf="isLoading">Eliminando...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

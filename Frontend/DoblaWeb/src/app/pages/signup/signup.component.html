@@ -61,6 +61,19 @@
     </form>
   </div>
 
+  <div *ngIf="showCodeModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Verificación de Empleado</h3>
+      <p>Ingresa el código que recibiste en {{ userData.email }}:</p>
+      <input [(ngModel)]="verificationCode" placeholder="Código de 6 dígitos">
+      <div class="modal-buttons">
+        <button (click)="verifyCode()" [disabled]="isLoading">
+          {{ isLoading ? 'Verificando...' : 'Verificar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="signup-image">
     <img src="assets/auth/signup-image.png" alt="Imagen de registro">
   </div>

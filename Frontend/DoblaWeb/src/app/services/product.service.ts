@@ -6,15 +6,13 @@ import { catchError, map, timeout, tap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
-  description?: string;
-  price: number;
+  description: string;
+  images: any[]; // Cambiado para manejar tanto strings como objetos
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  imageUrl?: string;
-  [key: string]: any;
 }
 
 @Injectable({
@@ -34,7 +32,15 @@ export class ProductService {
       'Expires': '0'
     });
   }
-
+  private handleError(error: HttpErrorResponse): Observable<never> {
+  const errorDetails = this.getErrorDetails(error);
+  console.error('Error en ProductService:', errorDetails);
+  
+  // Mensaje amigable para el usuario
+  const userMessage = this.getUserFriendlyMessage(error);
+  
+  return throwError(() => new Error(userMessage));
+}
   // Método optimizado para headers
   private getAuthHeaders(): HttpHeaders {
   let headers = new HttpHeaders();
@@ -58,22 +64,115 @@ export class ProductService {
 }
 
   // Método principal para obtener productos
+ 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(this.apiUrl, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      timeout(10000),
-      map(response => this.validateAndTransformResponse(response)),
-      catchError(error => this.handleReadError(error))
+      map((response: any) => {
+        // Transformación para manejar diferentes formatos de respuesta
+        const products = response.data || response;
+        if (!Array.isArray(products)) return [];
+        
+        return products.map((product: any) => ({
+          _id: product._id || product.id,
+          name: product.name,
+          description: product.description,
+          images: this.transformImages(product.images),
+          isActive: product.isActive,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
+        }));
+      }),
+      catchError(this.handleError)
     );
   }
 
+//    private transformImages(images: any): any[] {
+//   if (!images) return [];
+//   if (Array.isArray(images)) {
+//     return images.map(img => {
+//       if (typeof img === 'string') {
+//         return { 
+//           url: img.startsWith('http') ? img : `${environment.apiUrl}/${img.replace(/^\/+/, '')}`
+//         };
+//       }
+//       return {
+//         path: img.path,
+//         filename: img.filename,
+//         url: img.url || `${environment.apiUrl}/${img.path.replace(/\\/g, '/').replace(/^\/+/, '')}`
+//       };
+//     });
+//   }
+//   return [];
+// }
+
+//   getFullImageUrl(imagePath: string): string {
+//   if (!imagePath) return 'assets/default-product.png';
+  
+//   // Si ya es una URL completa
+//   if (imagePath.startsWith('http')) return imagePath;
+  
+//   // Si es un objeto con propiedad url
+//   if (typeof imagePath === 'object' && imagePath.url) {
+//     return this.getFullImageUrl(imagePath.url);
+//   }
+  
+//   // Construir URL completa
+//   return `${environment.apiUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+// }
   // Método para productos activos
   getActiveProducts(): Observable<Product[]> {
     return this.getProducts().pipe(
       map(products => products.filter(product => product.isActive))
     );
   }
+// Método mejorado para obtener URLs de imágenes
+getProductImageUrl(imageInfo: any): string {
+  if (!imageInfo) return 'assets/default-product.png';
+
+  // Caso 1: URL completa directa
+  if (typeof imageInfo === 'string' && imageInfo.startsWith('http')) {
+    return imageInfo;
+  }
+
+  // Caso 2: Objeto con filename (formato preferido)
+  if (imageInfo.filename) {
+    return `${environment.apiUrl}/product/image/${encodeURIComponent(imageInfo.filename)}`;
+  }
+
+  // Caso 3: Objeto con url
+  if (imageInfo.url) {
+    if (imageInfo.url.startsWith('http')) return imageInfo.url;
+    return `${environment.apiUrl}${imageInfo.url.startsWith('/') ? '' : '/'}${imageInfo.url}`;
+  }
+
+  // Default
+  return 'assets/default-product.png';
+}
+
+// Método transformImages actualizado
+private transformImages(images: any): any[] {
+  if (!images) return [];
+  
+  return (Array.isArray(images) ? images : [images]).map(img => {
+    // Si ya es un objeto formateado
+    if (typeof img === 'object' && (img.url || img.filename)) {
+      return img;
+    }
+    
+    // Si es string (formato antiguo)
+    if (typeof img === 'string') {
+      return {
+        filename: img.split('/').pop(),
+        url: img.startsWith('http') ? img : `${environment.apiUrl}/${img.replace(/^\/+/, '')}`
+      };
+    }
+    
+    // Formato no reconocido
+    return { url: 'assets/default-product.png' };
+  });
+}
 
   // Crear producto con validación mejorada
   createProduct(formData: FormData): Observable<Product> {

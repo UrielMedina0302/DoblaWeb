@@ -197,62 +197,6 @@ export class AuthService {
     );
   }
 
-// // auth.service.ts
-// resetPassword(token: string, newPassword: string): Observable<any> {
-//   // Validación básica del token
-//   if (!token || token.length !== 64) {
-//     return throwError(() => ({
-//       status: 400,
-//       code: 'INVALID_TOKEN',
-//       message: 'Token de recuperación inválido'
-//     }));
-//   }
-
-//   const headers = new HttpHeaders({
-//     'Content-Type': 'application/json',
-//     'X-Request-Source': 'Angular-Reset-Password'
-//   });
-
-//   return this.http.patch(
-//     `${this.apiUrl}/resetPassword/${encodeURIComponent(token)}`,
-//     { 
-//       password: newPassword,
-//       passwordConfirm: newPassword 
-//     },
-//     { 
-//       headers,
-//       observe: 'response' // Para obtener la respuesta completa
-//     }
-//   ).pipe(
-//     timeout(30000), // Timeout de 30 segundos
-//     catchError((error: HttpErrorResponse) => {
-//       console.error('Error en resetPassword:', {
-//         status: error.status,
-//         url: error.url,
-//         error: error.error
-//       });
-
-//       let userMessage = 'Error al cambiar la contraseña';
-//       let errorCode = 'UNKNOWN_ERROR';
-      
-//       if (error.status === 401) {
-//         userMessage = error.error?.message || 'El enlace ha expirado o es inválido';
-//         errorCode = 'TOKEN_EXPIRED_OR_INVALID';
-//       } else if (error.status === 0) {
-//         userMessage = 'Error de conexión con el servidor';
-//         errorCode = 'NETWORK_ERROR';
-//       }
-
-//       return throwError(() => ({
-//         status: error.status,
-//         code: errorCode,
-//         message: userMessage,
-//         details: error.error?.details || {}
-//       }));
-//     })
-//   );
-// }
-// auth.service.ts
 resetPassword(token: string, newPassword: string): Observable<any> {
   const headers = new HttpHeaders({
     'Content-Type': 'application/json'
@@ -276,6 +220,52 @@ resetPassword(token: string, newPassword: string): Observable<any> {
       return throwError(() => ({
         status: error.status,
         message: errorMessage,
+        details: error.error?.details
+      }));
+    })
+  );
+}
+  // Método para notificar a la empresa (actualizado)
+requestEmployeeCode(email: string): Observable<any> {
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/json',
+    'X-Request-Source': 'Employee-Registration'
+  });
+
+  return this.http.post(
+    `${this.apiUrl}/request-employee-code`, 
+    { email }, // Cambiado de employeeEmail a email
+    { headers }
+  ).pipe(
+    timeout(30000), // Timeout de 30 segundos
+    catchError((error: HttpErrorResponse) => {
+      console.error('Error en requestEmployeeCode:', {
+        status: error.status,
+        url: error.url,
+        error: error.error
+      });
+      return throwError(() => this.handleAuthError(error));
+    })
+  );
+}
+
+// Método para verificar código (actualizado)
+verifyEmployeeCode(email: string, code: string): Observable<{ isValid: boolean }> {
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/json'
+  });
+
+  return this.http.post<{ isValid: boolean }>(
+    `${this.apiUrl}/verify-employee-code`,
+    { email, code },
+    { headers }
+  ).pipe(
+    timeout(15000), // Timeout de 15 segundos
+    catchError((error: HttpErrorResponse) => {
+      console.error('Error en verifyEmployeeCode:', error);
+      return throwError(() => ({
+        status: error.status,
+        message: error.error?.message || 'Error al verificar el código',
         details: error.error?.details
       }));
     })

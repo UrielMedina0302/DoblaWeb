@@ -1,13 +1,13 @@
-/* Estilos generales del contenedor principal */
+/* Estilos generales del contenedor principal - Versión mejorada */
 .login-container {
   display: grid;
   grid-template-columns: 1fr 1fr;  
-  height: 100vh;
+  min-height: 100vh;
   padding: 50px;  
   box-sizing: border-box;  
-  background-color: #f5f5f5; 
+  background-color: #f8f9fa; /* Fondo más claro y moderno */
 
-  /* Sección izquierda: Contenido del formulario */
+  /* Sección izquierda: Contenido del formulario (mantenido a la izquierda) */
   .login-content {
     display: flex;
     flex-direction: column;
@@ -16,10 +16,10 @@
     position: relative;    
     background: white;     
     border-radius: 10px;  
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  
+    padding: 40px; /* Más padding para mejor espaciado */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Sombra más sutil */
 
-    /* Botón "Regresar" */
+    /* Botón "Regresar" mejorado */
     .back-button {
       position: absolute;
       top: 20px;
@@ -28,51 +28,63 @@
       border: none;
       cursor: pointer;
       font-size: 16px;
-      color: #333;
+      color: #6c757d; /* Color más suave */
+      transition: color 0.2s; /* Transición suave */
+
       &:hover {
-        color: #000;
+        color: #495057; /* Color más oscuro al hover */
         text-decoration: underline;
       }
     }
 
-    /* Título y botones */
+    /* Título mejorado */
     h2 {
-      margin-bottom: 30px;
-      color: #333;
-      font-size: 24px;
+      margin-bottom: 2rem; /* Usando rem para mejor escalabilidad */
+      color: #343a40; /* Color más oscuro para mejor contraste */
+      font-size: 1.75rem; /* Tamaño relativo */
+      text-align: center;
     }
 
+    /* Botones de opción de rol mejorados */
     .role-options {
       display: flex;
       flex-direction: column;
-      gap: 15px;  
-      width: 80%;  
+      gap: 1rem; /* Usando rem */
+      width: 100%; /* Ancho completo */
+      max-width: 300px; /* Ancho máximo para mejor legibilidad */
 
       button {
-        padding: 12px 24px;
-        background-color: #4CAF50;  
-        color: white;
+        padding: 12px;
         border: none;
-        border-radius: 5px;
+        border-radius: 6px; /* Bordes más redondeados */
+        font-size: 1rem; /* Tamaño relativo */
+        font-weight: 500; /* Peso intermedio */
         cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease; /* Transición más suave */
+        width: 100%; /* Ancho completo */
 
-        &:hover {
-          background-color: #45a049;  
+        /* Primer botón - estilo azul */
+        &:first-child {
+          background-color: #4285f4; /* Azul moderno */
+          color: white;
+          &:hover {
+            background-color: #3367d6; /* Azul más oscuro al hover */
+          }
         }
 
-        &:first-child {
-          background-color: #2196F3;  
+        /* Segundo botón - estilo verde */
+        &:last-child {
+          background-color: #34a853; /* Verde moderno */
+          color: white;
           &:hover {
-            background-color: #0b7dda;
+            background-color: #2d9248; /* Verde más oscuro al hover */
           }
         }
       }
     }
   }
 
-  /* Sección derecha: Imagen */
+  /* Sección derecha: Imagen (mantenida a la derecha) */
   .login-image {
     display: flex;
     justify-content: center;
@@ -83,25 +95,144 @@
       max-width: 100%;
       max-height: 80vh;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
     }
   }
 
-  /* Responsive: Móvil */
-  @media (max-width: 768px) {
+  /* Responsive: Tablet y móvil */
+  @media (max-width: 992px) {
     grid-template-columns: 1fr;
-    padding: 20px;  
-
-    .login-content {
-      order: 2;  
-      padding-top: 60px;  
-    }
+    padding: 30px;
+    gap: 2rem;
 
     .login-image {
-      order: 1;  
+      order: -1; /* Mueve la imagen arriba en móvil */
+      padding: 0;
+      
       img {
-        max-height: 40vh;
+        max-height: 50vh;
       }
     }
+
+    .login-content {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  /* Responsive: Móvil pequeño */
+  @media (max-width: 576px) {
+    padding: 20px;
+    
+    .login-content {
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .role-options {
+        max-width: 100%;
+      }
+    }
+  }
+}
+/* Estilos para el modal de empleado */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.3s ease-out;
+
+  h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    color: #5a6a85;
+    text-align: center;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e0e4e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s;
+
+    &:focus {
+      border-color: #4285f4;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+    }
+  }
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+
+  button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+
+    &:first-child {
+      background-color: #4285f4;
+      color: white;
+
+      &:hover {
+        background-color: #3367d6;
+      }
+
+      &[disabled] {
+        background-color: #a0bff8;
+        cursor: not-allowed;
+      }
+    }
+
+    &:last-child {
+      background-color: #f1f3f5;
+      color: #5a6a85;
+
+      &:hover {
+        background-color: #e0e4e9;
+      }
+    }
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -1,70 +1,88 @@
-/* Contenedor principal con gradiente sutil */
+/* Contenedor principal */
 .signup-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-items: center;
   min-height: 100vh;
-  padding: 30px;
+  padding: 50px;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  gap: 20px;
+  background-color: #f8f9fa;
+  gap: 30px;
 }
 
-/* Tarjeta de formulario con sombra y bordes mejorados */
+/* Sección de imagen */
+.signup-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  
+  img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+/* Sección de contenido */
 .signup-content {
-  height: 550px;
   display: flex;
   flex-direction: column;
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  justify-content: center;
   position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  background: white;
+  border-radius: 10px;
+  padding: 60px 40px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  height: auto;
 }
 
-/* Botón de retroceso con diseño mejorado */
+/* Botón Regresar */
 .back-button {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  color: #5a6a85;
-  background: rgba(241, 243, 245, 0.8);
-  backdrop-filter: blur(2px);
+  top: 20px;
+  left: 20px;
+  background: none;
   border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #6c757d;
+  transition: all 0.2s;
+  padding: 5px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.3s ease;
-  
+
   &:hover {
-    background: rgba(228, 231, 235, 0.9);
-    transform: translateX(-2px);
+    color: #495057;
+    background-color: #f1f1f1;
   }
   
   svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
   }
 }
 
-/* Encabezado con acento de color */
 h2 {
-  margin: 0 0 15px 0;
-  font-size: 22px;
-  text-align: center;
+  margin: 0 0 30px 0;
   color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
   position: relative;
-  padding-bottom: 8px;
   
   &::after {
     content: "";
     position: absolute;
-    bottom: 0;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 50px;
@@ -74,109 +92,92 @@ h2 {
   }
 }
 
-/* Campos de formulario con diseño moderno */
-.form-group {
-  margin-bottom: 12px;
-  
-  label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
-    color: #5a6a85;
-    font-weight: 500;
-  }
-  
-  input {
-    width: 95%;
-    padding: 10px 12px;
-    border: 1px solid #e0e4e9;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s;
-    background-color: #f9fafb;
-    
-    &:focus {
-      border-color: #4285f4;
-      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
-      background-color: white;
-    }
-  }
-}
-
-/* Botón principal con gradiente */
-.signup-button {
+/* Formulario */
+.signup-form {
   width: 100%;
-  padding: 11px;
-  background: linear-gradient(to right, #4285f4, #34a853);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 10px;
-  box-shadow: 0 2px 6px rgba(66, 133, 244, 0.2);
-  
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(66, 133, 244, 0.25);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-}
+  max-width: 350px;
+  margin: 0 auto;
 
-/* Sección de imagen con centrado perfecto */
-.signup-image {
-  height: 450px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  position: relative;
-  
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
-    border-radius: 12px;
-    opacity: 0.03;
+  .form-group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #495057;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background-color: #f9f9f9;
+
+      &:focus {
+        border-color: #4285f4;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        background-color: white;
+      }
+
+      &::placeholder {
+        color: #aaa;
+      }
+    }
   }
-  
-  img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
-    transition: transform 0.5s ease;
-    
+
+  .signup-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
     &:hover {
-      transform: scale(1.02);
+      background-color: #3367d6;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 }
 
-/* Login social con diseño mejorado */
+/* Login social */
 .social-login {
-  margin: 15px 0;
-  
+  margin: 25px 0;
+  width: 100%;
+  max-width: 350px;
+  margin-left: auto;
+  margin-right: auto;
+
   .divider {
     display: flex;
     align-items: center;
-    color: #a1a8b3;
-    font-size: 12px;
-    margin: 12px 0;
+    color: #6c757d;
+    font-size: 14px;
+    margin: 15px 0;
     
     &::before,
     &::after {
       content: "";
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, transparent, #e0e4e9, transparent);
+      background: #e0e4e9;
       margin: 0 10px;
     }
   }
@@ -187,96 +188,186 @@ h2 {
     justify-content: center;
     
     .social-button {
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
       display: flex;
       align-items: center;
       gap: 8px;
       transition: all 0.3s;
       background: white;
+      border: 1px solid #e0e4e9;
+      cursor: pointer;
       
       &.facebook {
         color: #1877f2;
-        border: 1px solid #e7f1ff;
-        background: #f5f9ff;
         
         &:hover {
-          background: #e7f1ff;
+          background: #f5f9ff;
+          border-color: #c9d8f8;
         }
       }
       
       &.google {
         color: #db4437;
-        border: 1px solid #ffebee;
-        background: #fff5f5;
         
         &:hover {
-          background: #ffebee;
+          background: #fff5f5;
+          border-color: #f8d7d7;
         }
       }
       
       svg {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
       }
     }
   }
 }
 
-/* Enlace de login con transición */
+/* Enlace de login */
 .login-link {
   text-align: center;
-  font-size: 13px;
-  color: #8a94a6;
-  margin-top: 8px;
-  
+  font-size: 14px;
+  color: #6c757d;
+  margin-top: 20px;
+
   a {
     color: #4285f4;
     font-weight: 500;
     text-decoration: none;
-    transition: all 0.3s;
-    
+    margin-left: 5px;
+    transition: all 0.2s;
+
     &:hover {
-      color: #3367d6;
       text-decoration: underline;
     }
   }
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 992px) {
   .signup-container {
     grid-template-columns: 1fr;
-    
+    padding: 30px;
+    gap: 20px;
+
     .signup-image {
-      height: auto;
-      max-height: 350px;
       order: -1;
-      margin-bottom: 20px;
-      padding: 15px;
+      padding: 0;
       
       img {
-        max-height: 320px;
+        max-height: 300px;
+        width: auto;
       }
+    }
+
+    .signup-content {
+      padding: 50px 30px;
     }
   }
 }
 
 @media (max-width: 576px) {
   .signup-container {
-    padding: 20px;
-    
+    padding: 20px 15px;
+
     .signup-content {
-      padding: 20px 15px;
-      
+      padding: 40px 20px;
+
       h2 {
-        font-size: 20px;
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .signup-form {
+        .form-group input {
+          padding: 12px 10px;
+        }
+
+        .signup-button {
+          padding: 12px;
+        }
       }
     }
-    
-    .social-buttons {
-      flex-direction: column;
+  }
+  
+  .social-buttons {
+    flex-direction: column;
+  }
+}
+/* Estilos para el modal de verificación */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+
+  h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #5a6a85;
+    margin-bottom: 1.5rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e0e4e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+
+    &:focus {
+      border-color: #4285f4;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+    }
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: #3367d6;
+    }
+
+    &[disabled] {
+      background-color: #a0bff8;
+      cursor: not-allowed;
     }
   }
 }
