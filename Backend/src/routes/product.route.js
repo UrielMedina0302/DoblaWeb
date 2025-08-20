@@ -4,54 +4,69 @@ const productController = require('../controllers/product.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { checkAdminRole } = require('../middlewares/checkRole.middleware');
 const { smartUpload, handleUploadErrors } = require('../utils/upload.util');
-
 const path = require('path');
 const fs = require('fs');
+const mime = require('mime-types');
 
-// Nueva ruta para servir imágenes de productos
-// Ruta optimizada para servir imágenes
+// Ruta para servir imágenes
 router.get('/image/:filename', (req, res) => {
   const filename = req.params.filename;
-  // Usa la misma constante UPLOAD_DIR que usas en Multer
-  const filePath = path.join(UPLOAD_DIR, filename); // <- Cambio clave aquí
   
-  // Validación de seguridad mejorada
-  if (!filename.match(/^[\w-]+\.[a-zA-Z]{3,4}$/)) {
+  if (!filename || !filename.match(/^[a-zA-Z0-9\-_.]+\.(jpg|jpeg|png|gif|webp)$/i)) {
     return res.status(400).json({ 
       success: false,
-      message: 'Nombre de archivo inválido'
+      message: 'Nombre de archivo inválido o extensión no permitida'
     });
   }
 
-  if (!fs.existsSync(filePath)) {
-    // Opción 1: Servir imagen por defecto
-    const defaultImage = path.join(UPLOAD_DIR, 'default.jpg');
-    if (fs.existsSync(defaultImage)) {
-      return res.sendFile(defaultImage);
-    }
-    // Opción 2: Devolver error
+  const filePath = path.join(__dirname, '../uploads/products', filename);
+  
+   if (!fs.existsSync(filePath)) {
+    console.log('❌ Imagen no encontrada:', filename);
     return res.status(404).json({
       success: false,
       message: 'Imagen no encontrada'
     });
   }
-
-  // Determinar tipo MIME dinámicamente
+   try {
+    const stats = fs.statSync(filePath);
+    if (!stats.isFile()) {
+      return res.status(400).json({
+        success: false,
+        message: 'El recurso solicitado no es un archivo válido'
+      });
+    }
+  } catch (error) {
+    console.error('Error accediendo al archivo:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
   const mimeType = mime.lookup(filename) || 'application/octet-stream';
   
-  res.sendFile(filePath, {
-    headers: {
-      'Content-Type': mimeType,
-      'Access-Control-Allow-Origin': '*', // O especifica tu dominio
-      'Cache-Control': 'public, max-age=31536000' // 1 año de cache
+   res.set({
+    'Content-Type': mimeType,
+    'Access-Control-Allow-Origin': '*', // Permite cualquier origen
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Cache-Control': 'public, max-age=31536000', // 1 año de cache
+    'X-Content-Type-Options': 'nosniff'
+  });
+
+  // Servir el archivo
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error enviando archivo:', err);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'Error al servir la imagen'
+        });
+      }
     }
   });
-});
-
-// Middleware para respuestas consistentes
-router.use((req, res, next) => {
-  res.type('json');
-  next();
 });
 
 // Rutas públicas
@@ -61,25 +76,36 @@ router.get('/:product_id', productController.getProductById);
 // Rutas protegidas
 router.use(authenticate, checkAdminRole);
 
-// Ruta para crear/actualizar producto (inteligente)
+// Ruta para crear producto - ORDEN CORRECTO
 router.post(
   '/',
+  (req, res, next) => {
+    console.log('🔍 Content-Type recibido:', req.headers['content-type']);
+    console.log('🔍 Body antes de multer:', req.body);
+    next();
+  },
   smartUpload('images', 5),
+  (req, res, next) => {
+    console.log('✅ Body después de multer:', req.body);
+    console.log('✅ Archivos procesados:', req.files ? req.files.length : 0);
+    next();
+  },
   handleUploadErrors,
   productController.createProduct
 );
 
-// Ruta para actualizar datos del producto (sin imágenes)
+// Ruta para actualizar producto - también con multer
 router.patch(
   '/:product_id',
-  express.json(),
+  smartUpload('images', 5),
+  handleUploadErrors,
   productController.updateProduct
 );
 
 // Ruta para eliminar producto
 router.delete('/:product_id', productController.deleteProduct);
 
-// Manejador de errores específico
+// Manejador de errores
 router.use((err, req, res, next) => {
   console.error('Error en rutas de productos:', err);
   res.status(err.status || 500).json({

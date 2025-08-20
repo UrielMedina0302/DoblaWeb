@@ -1,4 +1,3 @@
-
 const productDao = require('../dao/product.dao');
 const APIFeatures = require('../utils/APIFeactures.util.js')
 const fs = require('fs');
@@ -19,47 +18,61 @@ const cleanUploadedFiles = (files) => {
   }
 };
 
+// controllers/product.controller.js
 exports.createProduct = async (req, res, next) => {
   try {
-    // Validaciones básicas
-    if (!req.body.name || !req.body.description) {
-      throw createError(400, 'Nombre y descripción son requeridos');
-    }
+    console.log('Body recibido:', req.body);
+    console.log('Archivos recibidos:', req.files);
 
-    const productData = {
-      name: req.body.name,
-      description: req.body.description,
-      isActive: req.body.isActive === 'true',
-      images: []
-    };
+    const { name, description } = req.body;
 
-    // Procesar imágenes si existen
-    if (req.files && req.files.length > 0) {
-      productData.images = req.files.map(file => ({
-  path: file.path,
-  filename: file.filename,
- url: `/api/product/image/${file.filename}` // Ruta relativa consistente
-}));
-    }
-
-    const newProduct = await productDao.createProduct(productData);
-    res.status(201).json({
-      success: true,
-      data: newProduct
-    });
-
-  } catch (error) {
-    // Limpiar archivos subidos en caso de error
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        try {
-          fs.unlinkSync(file.path);
-        } catch (cleanupError) {
-          console.error('Error limpiando archivo:', cleanupError);
-        }
+    if (!name || !description) {
+      // Limpiar archivos subidos si hay error de validación
+      if (req.files && req.files.length > 0) {
+        cleanUploadedFiles(req.files);
+      }
+      return res.status(400).json({ 
+        message: 'Faltan datos obligatorios: nombre y descripción son requeridos' 
       });
     }
-    next(error);
+
+    // Procesar imágenes si hay archivos
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(file => ({
+        filename: file.filename,
+        originalname: file.originalname,
+        path: file.path,
+        url: `${req.protocol}://${req.get('host')}/api/product/image/${file.filename}`,
+        size: file.size,
+        mimetype: file.mimetype
+      }));
+      console.log('Imágenes procesadas:', images);
+    }
+
+    const newProduct = {
+      name,
+      description,
+      images,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // Guardar en la base de datos (debes implementar productDao.createProduct)
+    const createdProduct = await productDao.createProduct(newProduct);
+
+    res.status(201).json({ 
+      message: 'Producto creado exitosamente', 
+      data: createdProduct 
+    });
+  } catch (error) {
+    console.error('Error en createProduct:', error);
+    // Limpiar archivos subidos en caso de error
+    if (req.files && req.files.length > 0) {
+      cleanUploadedFiles(req.files);
+    }
+    res.status(500).json({ message: 'Error interno del servidor al crear producto' });
   }
 };
 
@@ -76,18 +89,23 @@ exports.updateProduct = async (req, res, next) => {
         const updateData = { ...req.body };
 
         // Procesar imágenes si hay archivos nuevos
-         if (req.files && req.files.length > 0) {
-      const uploadedFiles = req.files.map(file => ({
-        filename: file.filename,
-        originalname: file.originalname,
-        path: file.path,
-        url: `${req.protocol}://${req.get('host')}/api/products/image/${file.filename}`,
-        size: file.size,
-        mimetype: file.mimetype
-      }));
-      
-      updates.images = [...updates.images || [], ...uploadedFiles];
-    }
+        if (req.files && req.files.length > 0) {
+          const uploadedFiles = req.files.map(file => ({
+            filename: file.filename,
+            originalname: file.originalname,
+            path: file.path,
+            url: `${req.protocol}://${req.get('host')}/api/product/image/${file.filename}`,
+            size: file.size,
+            mimetype: file.mimetype
+          }));
+          
+          // Si ya hay imágenes, agregar las nuevas, sino crear el array
+          if (updateData.images && Array.isArray(updateData.images)) {
+            updateData.images = [...updateData.images, ...uploadedFiles];
+          } else {
+            updateData.images = uploadedFiles;
+          }
+        }
 
         // Actualizar el producto en la base de datos
         const updatedProduct = await productDao.updateProduct(id, updateData);

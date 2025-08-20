@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const {Schema} = mongoose;
+const mongoose = require('mongoose');// Importa mongoose para definir el esquema del modelo
+const {Schema} = mongoose;// Importa Schema de mongoose para definir el esquema del modelo
 
 const productSchema = new mongoose.Schema({
     name: {
@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
     images: [{
-        path: {
+        path: {// Ruta del archivo en el servidor
             type: String,
             required: true
         },

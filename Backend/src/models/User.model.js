@@ -5,15 +5,8 @@ const jwt = require('jsonwebtoken'); //Se importa jsonwebtoken para poder genera
 const crypto = require('crypto'); //Se importa crypto para poder generar tokens de restablecimiento de contraseña
 
 const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true 
-    },
-    lastname:{
-        type: String,
-        required:true
-    },
+    name: { type: String, required: true, trim: true    },
+    lastname:{type: String, required:true},
     email: {
         type: String,
         required: true,
@@ -25,9 +18,7 @@ const userSchema = new mongoose.Schema({
                 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
             },
             message: props => `${props.value} no es un email válido!`
-        }
-    },
-
+        }},
     password: {
         type: String,
         required: true,

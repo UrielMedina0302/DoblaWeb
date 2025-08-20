@@ -1,14 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User.model'); // Importa el modelo de usuario
-
-
 const publicRoutes = [
   { method: 'POST', path: '/api/auth/forgotPassword' },
   { method: 'POST', path: '/api/auth/login' },
   { method: 'POST', path: '/api/auth/signup' },
   { method: 'PATCH', path: /^\/api\/auth\/resetPassword\/.+/ }
 ];
-
 exports.authenticate = async (req, res, next) => {
   // Verifica si es ruta pública
   const isPublic = publicRoutes.some(route => {
@@ -17,12 +14,10 @@ exports.authenticate = async (req, res, next) => {
       : route.path.test(req.path);
     return pathMatches && req.method === route.method;
   });
-
   if (isPublic) {
     console.log(`Accediendo a ruta pública: ${req.method} ${req.path}`);
     return next();
   }
-
   try {
     // Extraer token
     let token;
@@ -31,7 +26,6 @@ exports.authenticate = async (req, res, next) => {
     } else if (req.cookies?.jwt) {
       token = req.cookies.jwt;
     }
-
     if (!token) {
       console.log('No se encontró token en la solicitud');
       return res.status(401).json({ 
@@ -40,7 +34,6 @@ exports.authenticate = async (req, res, next) => {
         redirectToLogin: true
       });
     }
-
     // Verificar token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const currentUser = await User.findById(decoded.userId);

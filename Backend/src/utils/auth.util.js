@@ -37,4 +37,4 @@ const CreateSendToken = (user, statusCode, res) => {
 };
 
 module.exports = { CreateSendToken }; // Exporta la función para que pueda ser utilizada en otros módulos
-// Esta función se encarga de crear y enviar el token de autenticación al cliente, junto
+// Esta función se encarga de crear y enviar el token de autenticación al cliente, junto con la cookie de sesión.
