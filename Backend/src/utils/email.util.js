@@ -149,7 +149,7 @@ async sendEmployeeCodeRequest(employeeEmail, code, approvalUrl) {
   });
 
   return this.send(
-    'employeeCodeRequest', // nombre del archivo Pug sin la extensión
+    'employeeCodeRequest', 
     'Solicitud de Código de Empleado - Aprobación Requerida',
     {
       email: employeeEmail,
@@ -164,8 +164,7 @@ async sendEmployeeCodeConfirmation(code) {
     'employeeCodeConfirmation',
     'Tu Código de Registro - DoblaWeb',
     {
-      code,
-      registrationUrl: this.url // Este viene desde el constructor
+      code
     }
   );
 }

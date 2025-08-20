@@ -13,9 +13,8 @@ connectDB();
 
 const app = express();
 
-// ⚠️⚠️⚠️ DESCOMENTA ESTOS MIDDLEWARES ESENCIALES ⚠️⚠️⚠️
 app.use(express.json()); // Para JSON
-app.use(express.urlencoded({ extended: true })); // Para form-data
+app.use(express.urlencoded({ extended: true })); 
 
 // Settings
 app.set('port', process.env.PORT || 3000);
@@ -83,3 +82,4 @@ app.use('*', (req, res) => {
 app.listen(app.get('port'), () => {
   console.log(`Server running on port ${app.get('port')}`);
 });
+

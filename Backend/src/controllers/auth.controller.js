@@ -315,7 +315,7 @@ exports.requestEmployeeCode = async (req, res) => {
     await new sendEmail(
       { email: "doblaceros_laminados@hotmail.com", name: "Administrador" },
       approvalUrl
-    ).sendEmployeeCodeRequest(email, code, approvalUrl); // Usa plantilla adminCodeRequest.pug
+    ).sendEmployeeCodeRequest(email, code, approvalUrl); 
 
     return res.json({ success: true, message: "Solicitud enviada al administrador" });
   } catch (error) {
@@ -329,41 +329,40 @@ exports.requestEmployeeCode = async (req, res) => {
 
 // ✅ Paso 2: El administrador aprueba la solicitud
 exports.approveEmployeeCode = async (req, res) => {
-  const { email, code } = req.query; // IMPORTANTE: usar query porque viene del botón del correo
+  const { email, code } = req.query;
 
-  if (!email || !code) {
-    return res.status(400).send("Parámetros faltantes");
-  }
+  if (!email || !code) return res.status(400).send("Parámetros faltantes");
 
   const storedData = employeeCodes.get(email);
 
-  // Validar código y expiración
-  if (
-    !storedData ||
-    storedData.code !== code ||
-    storedData.expiresAt < Date.now()
-  ) {
+  if (!storedData || storedData.code !== code || storedData.expiresAt < Date.now()) {
     return res.status(400).send("Código inválido o expirado");
   }
 
   try {
-    const registrationUrl = `${process.env.FRONTEND_URL}/signup?code=${code}`;
+    // Enviar correo pero no bloquear render
+    try {
+      await new sendEmail({ email, name: "Empleado" }).sendEmployeeCodeConfirmation(code);
+    } catch (err) {
+      console.error("❌ Error enviando correo:", err);
+    }
 
-    // Enviar correo al empleado con su código y link de registro
-    await new sendEmail(
-      { email, name: "Empleado" },
-      registrationUrl
-    ).sendEmployeeCodeConfirmation(code); // Usa plantilla employeeCodeConfirmation.pug
-
-    // Eliminar el código del almacenamiento
     employeeCodes.delete(email);
 
-    return res.send("✅ Código aprobado y enviado al empleado.");
+    return res.render("approvalSuccess", {
+      email,
+      code,
+      title: "Solicitud aprobada",
+      message: `El código ha sido enviado exitosamente al empleado: ${email}`
+    });
+
   } catch (error) {
-    console.error("❌ Error enviando email al empleado:", error);
-    return res.status(500).send("Error interno al enviar código al empleado");
+    console.error("❌ Error interno:", error);
+    return res.status(500).send("Error interno al procesar solicitud");
   }
 };
+
+
 
 // 🧪 Paso 3: Verificación de código (usado por frontend)
 exports.verifyEmployeeCode = async (req, res) => {
