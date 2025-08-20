@@ -1,60 +1,79 @@
 <div class="signup-container">
   <div class="signup-content">
-    <button class="back-button" routerLink="/">← Regresar</button>
+    <button class="back-button" routerLink="/">Regresar</button>
     <h2>Crear cuenta</h2>
-    
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div><br>
     <form class="signup-form" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="name">Nombre</label>
-        <input type="text" id="name" placeholder="Nombre completo" 
-               [(ngModel)]="userData.name" name="name" required>
+        <input
+          type="text"
+          id="name"
+          placeholder="Nombre completo"
+          [(ngModel)]="userData.name"
+          name="name"
+          required
+        />
       </div>
-      
+
       <div class="form-group">
         <label for="lastname">Apellidos</label>
-        <input type="text" id="lastname" placeholder="Apellidos completos" 
-               [(ngModel)]="userData.lastname" name="lastname" required>
+        <input
+          type="text"
+          id="lastname"
+          placeholder="Apellidos completos"
+          [(ngModel)]="userData.lastname"
+          name="lastname"
+          required
+        />
       </div>
-      
+
       <div class="form-group">
         <label for="email">Correo electrónico:</label>
-        <input type="email" id="email" placeholder="ejem:user@example.com" 
-               [(ngModel)]="userData.email" name="email" required>
+        <input
+          type="email"
+          id="email"
+          placeholder="ejem:user@example.com"
+          [(ngModel)]="userData.email"
+          name="email"
+          required
+        />
       </div>
 
       <div class="form-group">
         <label for="password">Contraseña</label>
-        <input type="password" id="password" placeholder="••••••••" 
-               [(ngModel)]="userData.password" name="password" required>
+        <input
+          type="password"
+          id="password"
+          placeholder="••••••••"
+          [(ngModel)]="userData.password"
+          name="password"
+          required
+        />
       </div>
-      
+
       <div class="form-group">
         <label for="confirm-password">Repetir contraseña</label>
-        <input type="password" id="confirm-password" placeholder="••••••••" 
-               [(ngModel)]="userData.confirmPassword" name="confirmPassword" required>
+        <input
+          type="password"
+          id="confirm-password"
+          placeholder="••••••••"
+          [(ngModel)]="userData.confirmPassword"
+          name="confirmPassword"
+          required
+        />
       </div>
-      
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
-      
+
+
       <button type="submit" class="signup-button" [disabled]="isLoading">
         <span *ngIf="!isLoading">Registrar</span>
         <span *ngIf="isLoading">Cargando...</span>
       </button>
-      
-      <div class="social-login">
-        <p class="divider">O registrarse con</p>
-        <div class="social-buttons">
-          <button type="button" class="social-button facebook">
-            <i class="fab fa-facebook-f"></i> Facebook
-          </button>
-          <button type="button" class="social-button google">
-            <i class="fab fa-google"></i> Google
-          </button>
-        </div>
-      </div>
-      
+
+
       <div class="login-link">
         ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
       </div>
@@ -65,16 +84,19 @@
     <div class="modal-content">
       <h3>Verificación de Empleado</h3>
       <p>Ingresa el código que recibiste en {{ userData.email }}:</p>
-      <input [(ngModel)]="verificationCode" placeholder="Código de 6 dígitos">
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      <br />
+      <input [(ngModel)]="verificationCode" placeholder="Código de 6 dígitos" />
       <div class="modal-buttons">
         <button (click)="verifyCode()" [disabled]="isLoading">
-          {{ isLoading ? 'Verificando...' : 'Verificar' }}
+          {{ isLoading ? "Verificando..." : "Verificar" }}
         </button>
       </div>
     </div>
   </div>
 
   <div class="signup-image">
-    <img src="https://th.bing.com/th/id/OIP.o9ZbTRJzmZJykVDyqbtNXQHaEG?w=332&h=183&c=7&r=0&o=5&pid=1.7" alt="Imagen de registro">
   </div>
 </div>

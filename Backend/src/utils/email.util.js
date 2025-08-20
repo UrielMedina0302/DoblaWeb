@@ -71,45 +71,51 @@ module.exports = class Email {
   }
 
   // Método principal para enviar emails
-  async send(template, subject) {
-    try {
-      // Validación reforzada
-      if (!this.to || !this.to.includes('@')) {
-        throw new Error(`Destinatario inválido: ${this.to}`);
-      }
-
-      const html = await this.renderTemplate(template);
-      const text = htmlToText.convert(html);
-
-      const mailOptions = {
-        from: this.from,
-        to: this.to,
-        subject,
-        html,
-        text,
-        headers: {
-          'X-App': 'DoblaWeb'
-        }
-      };
-
-      console.log('Preparando envío a:', mailOptions.to);
-
-      const transport = this.newTransport();
-      await transport.verify();
-      const info = await transport.sendMail(mailOptions);
-      
-      console.log(`✉️ Email enviado a ${this.to} [${info.messageId}]`);
-      return info;
-      
-    } catch (error) {
-      console.error('❌ Error en Email.send:', {
-        to: this.to,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
+ async send(template, subject, extraData = {}) {
+  try {
+    if (!this.to || !this.to.includes('@')) {
+      throw new Error(`Destinatario inválido: ${this.to}`);
     }
+
+    // Unir datos globales con datos específicos del email
+    this.templateData = {
+      ...this.templateData,
+      ...extraData
+    };
+
+    const html = await this.renderTemplate(template);
+    const text = htmlToText.convert(html);
+
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject,
+      html,
+      text,
+      headers: {
+        'X-App': 'DoblaWeb'
+      }
+    };
+
+    console.log('📤 Enviando email a:', mailOptions.to);
+
+    const transport = this.newTransport();
+    await transport.verify();
+    const info = await transport.sendMail(mailOptions);
+
+    console.log(`✅ Email enviado a ${this.to} [${info.messageId}]`);
+    return info;
+
+  } catch (error) {
+    console.error('❌ Error en Email.send:', {
+      to: this.to,
+      error: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
+}
+
 
   // Email específico para restablecimiento de contraseña
   async sendPasswordReset() {
@@ -136,20 +142,19 @@ module.exports = class Email {
   }
 
 async sendEmployeeCodeRequest(employeeEmail, code, approvalUrl) {
-  // 3️⃣ Verificación antes de enviar
-  console.log("✉️ Datos para el email:", {
+  console.log("✉️ Enviando solicitud de aprobación:", {
     email: employeeEmail,
-    code: code,
-    approvalUrl: approvalUrl
+    code,
+    approvalUrl
   });
 
   return this.send(
-    'employeeCodeRequest',
+    'employeeCodeRequest', // nombre del archivo Pug sin la extensión
     'Solicitud de Código de Empleado - Aprobación Requerida',
     {
-      email: employeeEmail, // Estos deben coincidir con #{email} en PUG
-      code: code,
-      approvalUrl: approvalUrl
+      email: employeeEmail,
+      code,
+      approvalUrl
     }
   );
 }
@@ -159,9 +164,11 @@ async sendEmployeeCodeConfirmation(code) {
     'employeeCodeConfirmation',
     'Tu Código de Registro - DoblaWeb',
     {
-      code
+      code,
+      registrationUrl: this.url // Este viene desde el constructor
     }
   );
 }
+
 }
 module.exports.sendEmail = (user, url) => new module.exports(user, url).sendPasswordReset();

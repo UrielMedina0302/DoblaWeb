@@ -1,36 +1,14 @@
 /* login-layout.component.css */
 .login-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Mantenemos las dos columnas iguales */
+  grid-template-columns: 1fr 1fr; 
   min-height: 100vh;
-  padding: 0; /* Eliminamos el padding para maximizar espacio */
+  padding: 0; 
   box-sizing: border-box;
   background-color: #f8f9fa;
+  gap: 0;
 
-  /* Sección de imagen (izquierda) - Solo agrandamos la imagen */
-  .login-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0; /* Eliminamos padding para más espacio */
-    
-    img {
-      width: 90%; /* Imagen más ancha */
-      height: auto;
-      max-height: 90vh; /* Ocupa casi toda la altura */
-      object-fit: contain; /* Mantiene proporciones sin recortar */
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
-      transition: all 0.3s ease;
-    }
-
-    img:hover {
-      transform: scale(1.02); /* Efecto de zoom sutil al pasar el cursor */
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    }
-  }
-
-  /* Sección de contenido (derecha) - Sin cambios en estructura */
+  /* Sección de contenido (derecha) */
   .login-content {
     display: flex;
     flex-direction: column;
@@ -40,7 +18,7 @@
     background: white;
     border-radius: 10px;
     padding: 40px;
-    margin: 20px; /* Margen para separación */
+    margin: 20px; 
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 
     /* Botón Regresar */
@@ -56,8 +34,7 @@
       transition: color 0.2s;
 
       &:hover {
-        color: #495057;
-        text-decoration: underline;
+        color: #4285f4;
       }
     }
 
@@ -89,35 +66,42 @@
           background-color: #4285f4;
           color: white;
           &:hover {
-            background-color: #3367d6;
+            background-color: #6666a6;
+            scale: 1.02;
           }
         }
 
         &:last-child {
-          background-color: #34a853;
+          background-color: #3367d6;
           color: white;
           &:hover {
-            background-color: #2d9248;
+            background-color: #6666a6;
+            scale: 1.02;
           }
         }
       }
     }
   }
 
+  /* Sección de imagen (izquierda) */
+  .login-image {  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0; 
+    overflow: hidden; 
+    background-color: #f8f9fa;
+    margin: 15px 0 0 20px;
+    max-height: 95vh;
+
+    background:url("https://lapyma.com.mx/wp-content/uploads/2020/07/img-corte-con-cizalla-420x420.jpg");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
   /* Responsive: Tablet y móvil */
   @media (max-width: 992px) {
-    grid-template-columns: 1fr;
-    padding: 0;
-
-    .login-image {
-      order: -1;
-      padding: 20px 20px 0 20px;
-      
-      img {
-        width: 80%;
-        max-height: 40vh;
-      }
-    }
 
     .login-content {
       margin: 20px;

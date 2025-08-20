@@ -18,10 +18,15 @@
   align-items: center;
 }
 
-.logo-container img {
-  height: 50px;
-  width: auto;
-  object-fit: contain;    /* Ideal para logos */
+.logo-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ecf0f1;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  padding: 5px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Menú (derecha) */

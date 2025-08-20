@@ -7,10 +7,15 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login); 
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
+
+//Rutas para el manejo de códigos de empleado
 router.post('/request-employee-code', authController.requestEmployeeCode); 
 router.post('/approve-employee-code', authController.approveEmployeeCode);
+router.post('/verify-employee-code', authController.verifyEmployeeCode);
+
 // Ruta protegida 
 router.use(authMiddleware.authenticate);
 router.get('/userinfo', authController.getCurrentUser);
 router.post('/logout', authController.logout);
+
 module.exports = router;

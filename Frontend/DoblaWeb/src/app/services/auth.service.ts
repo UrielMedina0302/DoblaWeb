@@ -39,7 +39,7 @@ export class AuthService {
 
   // Métodos públicos
   getToken(): string | null {
-    return localStorage.getItem(environment.jwtKey); // Asegúrate que jwtKey esté definido en environment
+    return localStorage.getItem(environment.jwtKey); 
   }
 
   getCurrentUser(): User | null {

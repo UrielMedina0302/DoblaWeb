@@ -2,39 +2,32 @@
 /* Contenedor principal */
 .signup-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Mantenemos las dos columnas iguales */
+  grid-template-columns: 1fr 1fr;
   min-height: 100vh;
-  padding: 0; /* Eliminamos el padding para maximizar espacio */
+  padding: 0; 
   box-sizing: border-box;
   background-color: #f8f9fa;
-  gap: 0; /* Eliminamos el gap para más espacio */
+  gap: 0; 
 }
 
-/* Sección de imagen - Solo agrandamos la imagen */
+/* Sección de imagen */
 .signup-image {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0; /* Eliminamos padding para más espacio */
-  overflow: hidden; /* Para que la imagen no se salga del contenedor */
-  background-color: #f8f9fa; /* Fondo por si la imagen no carga */
+  padding: 0; 
+  overflow: hidden;
+  background-color: #f8f9fa; 
+  margin: 20px 10px 0 0;
+  max-height: 95vh;
   
-  img {
-    width: 90%; /* Imagen más ancha */
-    height: 90vh; /* Ocupa casi toda la altura */
-    object-fit: cover; /* La imagen cubre todo el espacio */
-    border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
-    transition: all 0.3s ease;
-  }
-
-  img:hover {
-    transform: scale(1.02); /* Efecto de zoom sutil al pasar el cursor */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  }
+  background: url("https://www.cdl.es/wp-content/uploads/cdl-hierro-acero-perfiles-laminados-frio-omega.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
-/* Sección de contenido (izquierda) - Sin cambios en estructura */
+/* Sección de contenido (izquierda) */
 .signup-content {
   display: flex;
   flex-direction: column;
@@ -43,9 +36,10 @@
   background: white;
   border-radius: 10px;
   padding: 60px 40px;
-  margin: 20px; /* Margen para separación */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  height: auto;
+  margin: 20px 10px 0 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+  max-height: 95vh;
+  height: 75%;
 }
 
 /* Botón Regresar */
@@ -66,8 +60,7 @@
   gap: 5px;
 
   &:hover {
-    color: #495057;
-    background-color: #f1f1f1;
+    color: #4285f4;
   }
   
   svg {
@@ -104,7 +97,7 @@ h2 {
   margin: 0 auto;
 
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 
     label {
       display: block;
@@ -115,7 +108,7 @@ h2 {
     }
 
     input {
-      width: 100%;
+      width: 92%;
       padding: 14px 12px;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -158,74 +151,6 @@ h2 {
 
     &:active {
       transform: translateY(0);
-    }
-  }
-}
-
-/* Login social */
-.social-login {
-  margin: 25px 0;
-  width: 100%;
-  max-width: 350px;
-  margin-left: auto;
-  margin-right: auto;
-
-  .divider {
-    display: flex;
-    align-items: center;
-    color: #6c757d;
-    font-size: 14px;
-    margin: 15px 0;
-    
-    &::before,
-    &::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: #e0e4e9;
-      margin: 0 10px;
-    }
-  }
-  
-  .social-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    
-    .social-button {
-      padding: 10px 16px;
-      border-radius: 6px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s;
-      background: white;
-      border: 1px solid #e0e4e9;
-      cursor: pointer;
-      
-      &.facebook {
-        color: #1877f2;
-        
-        &:hover {
-          background: #f5f9ff;
-          border-color: #c9d8f8;
-        }
-      }
-      
-      &.google {
-        color: #db4437;
-        
-        &:hover {
-          background: #fff5f5;
-          border-color: #f8d7d7;
-        }
-      }
-      
-      svg {
-        width: 18px;
-        height: 18px;
-      }
     }
   }
 }
@@ -286,7 +211,7 @@ h2 {
   }
 
   input {
-    width: 100%;
+    width: 93%;
     padding: 12px;
     margin-bottom: 1.5rem;
     border: 1px solid #e0e4e9;
@@ -385,4 +310,13 @@ h2 {
   .social-buttons {
     flex-direction: column;
   }
+}
+
+/*error message*/
+.error-message {
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+  text-align: center;
 }

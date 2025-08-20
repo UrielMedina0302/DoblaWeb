@@ -107,6 +107,7 @@ export class SignupComponent {
         error: (err) => {
           this.errorMessage = 'Error al verificar el código';
           console.error(err);
+          this.isLoading = false;
         },
         complete: () => {
           this.isLoading = false;
