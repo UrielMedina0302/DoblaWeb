@@ -1,4 +1,4 @@
-/* Estructura base (tus estilos + mejoras) */
+/* admin-header.component.css */
 .simple-header {
   height: 10vh;
   min-height: 70px;
@@ -12,106 +12,89 @@
   box-sizing: border-box;
   position: relative;
   border: 8px solid #1c4aa6;
-}
-
-/* Foto de perfil con efecto interactivo */
-.profile-container {
-  position: relative;
   z-index: 100;
 }
 
-.profile-pic {
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ecf0f1;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.profile-pic:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-/* Dropdown estilizado */
-.profile-dropdown {
-  position: absolute;
-  top: 65px;
-  right: 0;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  min-width: 200px;
-  overflow: hidden;
-}
-
-.profile-dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.profile-dropdown li {
-  border-bottom: 1px solid #f1f1f1;
-}
-
-.profile-dropdown li:last-child {
-  border-bottom: none;
-}
-
-.profile-dropdown a, 
-.profile-dropdown button {
+/* Contenedor y botón de Cerrar Sesión (IZQUIERDA) */
+.logout-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 15px;
-  width: 100%;
-  text-align: left;
-  color: #2c3e50;
-  text-decoration: none;
-  background: none;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
   border: none;
-  cursor: pointer;
+  border-radius: 4px;
+  padding: 10px 15px;
   font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.profile-dropdown a:hover, 
-.profile-dropdown button:hover {
-  background-color: #f8f9fa;
-  color: #e74c3c;
+.logout-btn:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.profile-dropdown i {
-  width: 20px;
-  text-align: center;
+.logout-btn:active {
+  transform: translateY(0);
 }
 
-/* Logo centrado */
+/* Logo de texto centrado */
 .logo-container {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.logo-container img {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
   cursor: pointer;
   transition: transform 0.3s ease;
+  z-index: 100;
 }
 
-.logo-container img:hover {
+.logo-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ecf0f1;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  padding: 5px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.logo-text::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #e74c3c;
+  transition: width 0.3s ease;
+}
+
+.logo-container:hover .logo-text::after {
+  width: 100%;
+}
+
+.logo-container:hover {
   transform: translateX(-50%) scale(1.05);
 }
 
-/* Menú de navegación */
+/* Menú de navegación (DERECHA) */
 .simple-nav {
   list-style: none;
   display: flex;
   gap: 2rem;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
 }
 
 .simple-nav a {
@@ -143,16 +126,6 @@
   width: 100%;
 }
 
-/* Animación para dropdown */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fadeInOut {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
 /* 🔥 Responsive (Móviles) - Mejorado */
 @media (max-width: 768px) {
   .simple-header {
@@ -162,18 +135,27 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
+    position: relative;
+    z-index: 100;
+  }
+
+  .logout-container {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
   }
 
   .logo-container {
     position: static;
     transform: none;
-    order: 1;
+    order: 2;
     margin: 10px 0;
+    text-align: center;
   }
 
-  .profile-container {
-    order: 2;
-    margin-left: auto;
+  .logo-text {
+    font-size: 1.8rem;
   }
 
   nav {
@@ -187,15 +169,20 @@
     flex-wrap: wrap;
     gap: 1rem 2rem;
   }
-
-  .profile-pic,
-  .logo-container img {
-    height: 40px;
-    width: 40px;
-  }
-
-  .profile-dropdown {
-    top: 55px;
-    right: -15px;
+  
+  /* Ajustes adicionales para móviles pequeños */
+  @media (max-width: 480px) {
+    .simple-nav {
+      gap: 0.8rem 1.5rem;
+    }
+    
+    .logo-text {
+      font-size: 1.5rem;
+    }
+    
+    .logout-btn {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
   }
 }

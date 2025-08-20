@@ -8,5 +8,5 @@ import { RouterLink } from '@angular/router';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-logoPath = 'assets/images/Logo_pagina1.png';
+
 }

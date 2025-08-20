@@ -1,34 +1,56 @@
-/* Estilo MINIMALISTA */
+/* simple-header.component.css */
 .simple-header {
   background-color: #2c3e50;
   height: 10vh;
   min-height: 70px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  border: 2px solid #1c4aa6
+  border-bottom: 2px solid #1c4aa6;
 }
 
-/* Logo simplificado */
-.logo-container img {
-  height: 40px;
-  width: auto;
-  transition: opacity 0.2s;
+/* Logo de texto estilizado */
+.logo-container {
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.logo-container img:hover {
-  opacity: 0.9;
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ecf0f1;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  padding: 5px 0;
+}
+
+.logo-text::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #1c4aa6;
+  transition: width 0.3s ease;
+}
+
+.logo-container:hover .logo-text::after {
+  width: 100%;
+}
+
+.logo-container:active {
+  transform: scale(0.98);
 }
 
 /* Menú de navegación minimalista */
 .simple-header nav {
   display: flex;
   gap: 0.8rem;
-  position: absolute;
-  right: 20px;
 }
 
 /* Estilos base para botones */
@@ -52,7 +74,6 @@
 .simple-header nav div.register-btn {
   background-color: #1c4aa6;
   color: white;
-  
 }
 
 /* Efectos hover */
@@ -62,9 +83,9 @@
 }
 
 .simple-header nav div.register-btn:hover {
-  background-color: rgba(236, 240, 241, 0.1);
-  border-color: #ecf0f1;
+  background-color: #2a5fc7;
   transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Efecto activo */
@@ -81,12 +102,11 @@
     gap: 15px;
   }
 
-  .logo-container {
-    margin-bottom: 10px;
+  .logo-text {
+    font-size: 1.5rem;
   }
 
   .simple-header nav {
-    position: static;
     gap: 0.8rem;
     margin-top: 10px;
   }

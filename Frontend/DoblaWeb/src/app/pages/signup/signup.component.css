@@ -1,36 +1,40 @@
+/* signup-layout.component.css */
 /* Contenedor principal */
 .signup-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr; /* Mantenemos las dos columnas iguales */
   min-height: 100vh;
-  padding: 50px;
+  padding: 0; /* Eliminamos el padding para maximizar espacio */
   box-sizing: border-box;
   background-color: #f8f9fa;
-  gap: 30px;
+  gap: 0; /* Eliminamos el gap para más espacio */
 }
 
-/* Sección de imagen */
+/* Sección de imagen - Solo agrandamos la imagen */
 .signup-image {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 0; /* Eliminamos padding para más espacio */
+  overflow: hidden; /* Para que la imagen no se salga del contenedor */
+  background-color: #f8f9fa; /* Fondo por si la imagen no carga */
   
   img {
-    max-width: 100%;
-    max-height: 80vh;
+    width: 90%; /* Imagen más ancha */
+    height: 90vh; /* Ocupa casi toda la altura */
+    object-fit: cover; /* La imagen cubre todo el espacio */
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    object-fit: contain;
-    transition: transform 0.3s ease;
-    
-    &:hover {
-      transform: scale(1.02);
-    }
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+    transition: all 0.3s ease;
+  }
+
+  img:hover {
+    transform: scale(1.02); /* Efecto de zoom sutil al pasar el cursor */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   }
 }
 
-/* Sección de contenido */
+/* Sección de contenido (izquierda) - Sin cambios en estructura */
 .signup-content {
   display: flex;
   flex-direction: column;
@@ -39,6 +43,7 @@
   background: white;
   border-radius: 10px;
   padding: 60px 40px;
+  margin: 20px; /* Margen para separación */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   height: auto;
 }
@@ -245,57 +250,6 @@ h2 {
   }
 }
 
-/* Responsive Design */
-@media (max-width: 992px) {
-  .signup-container {
-    grid-template-columns: 1fr;
-    padding: 30px;
-    gap: 20px;
-
-    .signup-image {
-      order: -1;
-      padding: 0;
-      
-      img {
-        max-height: 300px;
-        width: auto;
-      }
-    }
-
-    .signup-content {
-      padding: 50px 30px;
-    }
-  }
-}
-
-@media (max-width: 576px) {
-  .signup-container {
-    padding: 20px 15px;
-
-    .signup-content {
-      padding: 40px 20px;
-
-      h2 {
-        font-size: 24px;
-        margin-bottom: 25px;
-      }
-
-      .signup-form {
-        .form-group input {
-          padding: 12px 10px;
-        }
-
-        .signup-button {
-          padding: 12px;
-        }
-      }
-    }
-  }
-  
-  .social-buttons {
-    flex-direction: column;
-  }
-}
 /* Estilos para el modal de verificación */
 .modal-overlay {
   position: fixed;
@@ -369,5 +323,66 @@ h2 {
       background-color: #a0bff8;
       cursor: not-allowed;
     }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .signup-container {
+    grid-template-columns: 1fr;
+    padding: 0;
+
+    .signup-image {
+      order: -1;
+      padding: 20px 20px 0 20px;
+      
+      img {
+        width: 80%;
+        height: 40vh; /* Altura fija para tablets */
+        object-fit: cover;
+      }
+    }
+
+    .signup-content {
+      margin: 20px;
+      padding: 50px 30px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .signup-container {
+    .signup-image {
+      padding: 15px 15px 0 15px;
+      
+      img {
+        width: 90%;
+        height: 35vh; /* Altura menor para móviles */
+      }
+    }
+    
+    .signup-content {
+      margin: 15px;
+      padding: 40px 20px;
+      
+      h2 {
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .signup-form {
+        .form-group input {
+          padding: 12px 10px;
+        }
+
+        .signup-button {
+          padding: 12px;
+        }
+      }
+    }
+  }
+  
+  .social-buttons {
+    flex-direction: column;
   }
 }

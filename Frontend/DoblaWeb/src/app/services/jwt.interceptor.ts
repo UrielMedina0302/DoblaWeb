@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
+// jwt.interceptor.ts - MEJORAR para no interferir con FormData
+
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(AuthService);
@@ -21,9 +23,9 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   // URLs de imágenes que no requieren token
   const imagePatterns = [
-  '/uploads/products/',
-  '/api/images/'
-];
+    '/uploads/products/',
+    '/api/product/image/'
+  ];
 
   // Verificar si es endpoint público
   const isPublicEndpoint = publicEndpoints.some(endpoint => req.url.includes(endpoint));
@@ -46,12 +48,20 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     }));
   }
 
-  // Clonar la solicitud y agregar el token
+  // ⚠️ IMPORTANTE: No establecer Content-Type si ya está definido (especialmente para FormData)
+  const contentType = req.headers.get('Content-Type');
+  const headers: { [name: string]: string | string[] } = {
+    Authorization: `Bearer ${token}`
+  };
+
+  // Solo agregar Content-Type si no está presente (para FormData, Angular lo establece automáticamente)
+  if (!contentType && !(req.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  // Clonar la solicitud
   const authReq = req.clone({
-    setHeaders: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': req.headers.get('Content-Type') || 'application/json'
-    }
+    setHeaders: headers
   });
 
   return next(authReq).pipe(

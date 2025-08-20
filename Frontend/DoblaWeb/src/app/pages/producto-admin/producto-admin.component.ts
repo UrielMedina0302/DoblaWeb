@@ -85,36 +85,45 @@ export class ProductoAdminComponent implements OnInit {
     });
   }
 
-getProductImage(product: Product): string {
-  if (!product.images || product.images.length === 0) {
+  getProductImage(product: Product): string {
+    if (!product.images || product.images.length === 0) {
+      return 'assets/default-product.png';
+    }
+
+    const firstImage = product.images[0];
+    
+    // Caso 1: Es un objeto con filename (formato nuevo)
+    if (firstImage && typeof firstImage === 'object' && firstImage.filename) {
+      return `${environment.apiUrl}/product/image/${encodeURIComponent(firstImage.filename)}`;
+    }
+    
+    // Caso 2: Es un string (nombre de archivo)
+    if (typeof firstImage === 'string') {
+      return `${environment.apiUrl}/product/image/${encodeURIComponent(firstImage)}`;
+    }
+    
+    // Caso 3: Tiene propiedad 'url' completa
+    if (firstImage && firstImage.url) {
+      return firstImage.url;
+    }
+    
     return 'assets/default-product.png';
   }
 
-  const firstImage = product.images[0];
-  
-  // Caso 1: Es un string (nombre de archivo)
-  if (typeof firstImage === 'string') {
-    return `${environment.apiUrl}/api/products/image/${encodeURIComponent(firstImage)}`;
+  handleImageError(event: Event, product?: Product): void {
+    const target = event.target as HTMLImageElement;
+    target.src = 'assets/default-product.png';
+    
+    // Opcional: intentar con otra imagen si hay múltiples
+    if (product && product.images && product.images.length > 1) {
+      setTimeout(() => {
+        const secondImage = product.images[1];
+        if (secondImage) {
+          target.src = this.getProductImage({ images: [secondImage] } as Product);
+        }
+      }, 1000);
+    }
   }
-  
-  // Caso 2: Tiene propiedad 'filename'
-  if (firstImage.filename) {
-    return `${environment.apiUrl}/api/products/image/${encodeURIComponent(firstImage.filename)}`;
-  }
-  
-  // Caso 3: Tiene propiedad 'url' completa
-  if (firstImage.url) {
-    return firstImage.url;
-  }
-  
-  return 'assets/default-product.png';
-}
-
-  handleImageError(event: Event): void {
-  const target = event.target as HTMLImageElement;
-  target.src = 'assets/img/default.jpg'; // imagen por defecto
-}
-
 
   getFullImageUrl(image: any): string {
     if (!image) return 'assets/default-product.png';
@@ -173,7 +182,7 @@ getProductImage(product: Product): string {
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     const maxFiles = 5;
-    const allowedTypes = ['image/jpeg', 'image/png'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
 
     const files = Array.from(input.files);
     
@@ -260,6 +269,16 @@ getProductImage(product: Product): string {
     this.errorMessage = null;
 
     const formData = this.prepareFormData();
+
+    // Debug: mostrar información del FormData
+    console.log('📤 Enviando FormData:');
+    for (const [key, value] of (formData as any).entries()) {
+      if (key === 'images') {
+        console.log(`   ${key}:`, (value as File).name, `(${(value as File).size} bytes)`);
+      } else {
+        console.log(`   ${key}:`, value);
+      }
+    }
 
     if (this.currentAction === 'add') {
       this.createProduct(formData);
@@ -398,7 +417,31 @@ getProductImage(product: Product): string {
   }
 
   private handleErrorResponse(error: HttpErrorResponse, context: string): void {
-    this.handleServiceError(error, context);
+    console.error(`Error al ${context}:`, error);
+    
+    if (error.status === 401 || error.status === 403) {
+      this.authService.logout();
+      this.router.navigate(['/login'], {
+        queryParams: { sessionExpired: true }
+      });
+      return;
+    }
+
+    // Mostrar el mensaje específico del servidor si está disponible
+    const serverMessage = error.error?.message || error.error?.error;
+    const errorMessages: {[key: number]: string} = {
+      0: 'Error de conexión con el servidor',
+      400: serverMessage || 'Datos inválidos enviados al servidor',
+      404: 'Recurso no encontrado',
+      409: 'Conflicto: El producto ya existe',
+      500: serverMessage || 'Error interno del servidor'
+    };
+
+    this.errorMessage = errorMessages[error.status] || 
+                       serverMessage || 
+                       `Error al ${context}. Por favor intente nuevamente.`;
+    this.errorDismissible = true;
+    this.isLoading = false;
   }
 
   closeModal(): void {

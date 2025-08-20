@@ -32,39 +32,63 @@ export class ProductService {
       'Expires': '0'
     });
   }
-  private handleError(error: HttpErrorResponse): Observable<never> {
-  const errorDetails = this.getErrorDetails(error);
-  console.error('Error en ProductService:', errorDetails);
+
+  // product.service.ts - MEJORAR handleError
+
+private handleError(error: HttpErrorResponse): Observable<never> {
+  console.error('Error completo en ProductService:', error);
   
-  // Mensaje amigable para el usuario
-  const userMessage = this.getUserFriendlyMessage(error);
+  // Extraer mensaje del servidor si está disponible
+  const serverMessage = error.error?.message || error.error?.error;
+  
+  let userMessage = 'Error desconocido';
+  
+  if (error.status === 0) {
+    userMessage = 'Error de conexión con el servidor';
+  } else if (error.status === 400) {
+    userMessage = serverMessage || 'Datos inválidos enviados al servidor';
+  } else if (error.status === 401) {
+    userMessage = 'Sesión expirada. Por favor inicia sesión nuevamente';
+    this.authService.logout();
+  } else if (error.status === 403) {
+    userMessage = serverMessage || 'No tienes permisos para realizar esta acción';
+  } else if (error.status === 404) {
+    userMessage = 'Recurso no encontrado';
+  } else if (error.status >= 500) {
+    userMessage = serverMessage || 'Error interno del servidor. Por favor intenta más tarde';
+  }
   
   return throwError(() => new Error(userMessage));
 }
+
   // Método optimizado para headers
-  private getAuthHeaders(): HttpHeaders {
-  let headers = new HttpHeaders();
+  private getAuthHeaders(forFormData: boolean = false): HttpHeaders {
+    let headers = new HttpHeaders();
 
-  const token = this.authService.getToken();
-  const user = this.authService.getCurrentUser();
+    const token = this.authService.getToken();
+    const user = this.authService.getCurrentUser();
 
-  if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    if (user?.id) {
+      headers = headers.set('X-User-Id', user.id.toString());
+    }
+
+    if (user?.role) {
+      headers = headers.set('X-User-Role', user.role);
+    }
+
+    // Para FormData, no establecer Content-Type
+    if (!forFormData) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
+
+    return headers;
   }
-
-  if (user?.id) {
-    headers = headers.set('X-User-Id', user.id.toString());
-  }
-
-  if (user?.role) {
-    headers = headers.set('X-User-Role', user.role);
-  }
-
-  return headers;
-}
 
   // Método principal para obtener productos
- 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(this.apiUrl, { 
       headers: this.getAuthHeaders() 
@@ -88,108 +112,90 @@ export class ProductService {
     );
   }
 
-//    private transformImages(images: any): any[] {
-//   if (!images) return [];
-//   if (Array.isArray(images)) {
-//     return images.map(img => {
-//       if (typeof img === 'string') {
-//         return { 
-//           url: img.startsWith('http') ? img : `${environment.apiUrl}/${img.replace(/^\/+/, '')}`
-//         };
-//       }
-//       return {
-//         path: img.path,
-//         filename: img.filename,
-//         url: img.url || `${environment.apiUrl}/${img.path.replace(/\\/g, '/').replace(/^\/+/, '')}`
-//       };
-//     });
-//   }
-//   return [];
-// }
-
-//   getFullImageUrl(imagePath: string): string {
-//   if (!imagePath) return 'assets/default-product.png';
-  
-//   // Si ya es una URL completa
-//   if (imagePath.startsWith('http')) return imagePath;
-  
-//   // Si es un objeto con propiedad url
-//   if (typeof imagePath === 'object' && imagePath.url) {
-//     return this.getFullImageUrl(imagePath.url);
-//   }
-  
-//   // Construir URL completa
-//   return `${environment.apiUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-// }
   // Método para productos activos
   getActiveProducts(): Observable<Product[]> {
     return this.getProducts().pipe(
       map(products => products.filter(product => product.isActive))
     );
   }
-// Método mejorado para obtener URLs de imágenes
-getProductImageUrl(imageInfo: any): string {
-  if (!imageInfo) return 'assets/default-product.png';
 
-  // Caso 1: URL completa directa
-  if (typeof imageInfo === 'string' && imageInfo.startsWith('http')) {
-    return imageInfo;
-  }
+  // Método mejorado para obtener URLs de imágenes
+  getProductImageUrl(imageInfo: any): string {
+    if (!imageInfo) return 'assets/default-product.png';
 
-  // Caso 2: Objeto con filename (formato preferido)
-  if (imageInfo.filename) {
-    return `${environment.apiUrl}/product/image/${encodeURIComponent(imageInfo.filename)}`;
-  }
-
-  // Caso 3: Objeto con url
-  if (imageInfo.url) {
-    if (imageInfo.url.startsWith('http')) return imageInfo.url;
-    return `${environment.apiUrl}${imageInfo.url.startsWith('/') ? '' : '/'}${imageInfo.url}`;
-  }
-
-  // Default
-  return 'assets/default-product.png';
-}
-
-// Método transformImages actualizado
-private transformImages(images: any): any[] {
-  if (!images) return [];
-  
-  return (Array.isArray(images) ? images : [images]).map(img => {
-    // Si ya es un objeto formateado
-    if (typeof img === 'object' && (img.url || img.filename)) {
-      return img;
+    // Caso 1: URL completa directa
+    if (typeof imageInfo === 'string' && imageInfo.startsWith('http')) {
+      return imageInfo;
     }
-    
-    // Si es string (formato antiguo)
-    if (typeof img === 'string') {
-      return {
-        filename: img.split('/').pop(),
-        url: img.startsWith('http') ? img : `${environment.apiUrl}/${img.replace(/^\/+/, '')}`
-      };
+
+    // Caso 2: Objeto con filename (formato preferido)
+    if (imageInfo.filename) {
+      return `${environment.apiUrl}/product/image/${encodeURIComponent(imageInfo.filename)}`;
     }
+
+    // Caso 3: Objeto con url
+    if (imageInfo.url) {
+      if (imageInfo.url.startsWith('http')) return imageInfo.url;
+      return `${environment.apiUrl}${imageInfo.url.startsWith('/') ? '' : '/'}${imageInfo.url}`;
+    }
+
+    // Default
+    return 'assets/default-product.png';
+  }
+
+  // Método transformImages actualizado
+  private transformImages(images: any): any[] {
+    if (!images) return [];
     
-    // Formato no reconocido
-    return { url: 'assets/default-product.png' };
-  });
-}
+    return (Array.isArray(images) ? images : [images]).map(img => {
+      // Si ya es un objeto formateado
+      if (typeof img === 'object' && (img.url || img.filename)) {
+        return img;
+      }
+      
+      // Si es string (formato antiguo)
+      if (typeof img === 'string') {
+        return {
+          filename: img.split('/').pop(),
+          url: img.startsWith('http') ? img : `${environment.apiUrl}/${img.replace(/^\/+/, '')}`
+        };
+      }
+      
+      // Formato no reconocido
+      return { url: 'assets/default-product.png' };
+    });
+  }
 
   // Crear producto con validación mejorada
   createProduct(formData: FormData): Observable<Product> {
-  this.validateAdminAccess();
-  this.validateFormData(formData);
+    this.validateAdminAccess();
+    this.validateFormData(formData);
 
-  // Configurar headers específicos para FormData
-  const headers = this.getAuthHeaders();
+    // Configurar headers específicos para FormData
+    const headers = this.getAuthHeaders(true);
 
-  return this.http.post<Product>(this.apiUrl, formData, {
-    headers: headers
-  }).pipe(
-    map(response => this.transformProduct(response)),
-    tap(() => this.auditOperation('create')),
-    catchError(error => this.handleAdminError(error))
-  );
-}
+    // Debug: mostrar información sobre los archivos
+    console.log('Enviando FormData con:', {
+      fileCount: formData.getAll('images').length,
+      name: formData.get('name'),
+      description: formData.get('description')
+    });
+
+    return this.http.post<Product>(this.apiUrl, formData, {
+      headers: headers
+    }).pipe(
+      map(response => this.transformProduct(response)),
+      tap(() => this.auditOperation('create')),
+      catchError(error => {
+        console.error('Error detallado en createProduct:', {
+          status: error.status,
+          message: error.message,
+          serverError: error.error
+        });
+        return this.handleAdminError(error);
+      })
+    );
+  }
 
   // Actualizar producto con validación de ID
   updateProduct(id: string, formData: FormData | Partial<Product>): Observable<Product> {
@@ -199,7 +205,7 @@ private transformImages(images: any): any[] {
     const url = this.buildProductUrl(id);
 
     return this.http.patch<Product>(url, formData, {
-      headers: this.getAuthHeaders()
+      headers: this.getAuthHeaders(formData instanceof FormData)
     }).pipe(
       map(response => this.transformProduct(response)),
       tap(() => this.auditOperation('update')),
@@ -238,17 +244,17 @@ private transformImages(images: any): any[] {
       id: product.id || product._id || '',
       name: product.name || '',
       description: product.description || '',
-      price: Number(product.price) || 0,
       isActive: Boolean(product.isActive),
       createdAt: product.createdAt ? new Date(product.createdAt) : undefined,
       updatedAt: product.updatedAt ? new Date(product.updatedAt) : undefined,
-      imageUrl: product.imageUrl || '/assets/default-product.png'
+      images: this.transformImages(product.images)
     };
   }
 
   private validateAdminAccess(): void {
     if (!this.authService.isAdmin()) {
-      throw this.createError('Acción no autorizada', 403);
+      console.error('Intento de acceso sin permisos de administrador');
+      throw this.createError('Acción no autorizada: Se requieren privilegios de administrador', 403);
     }
   }
 
@@ -314,7 +320,7 @@ private transformImages(images: any): any[] {
       401: 'Autenticación requerida',
       403: error.error?.message || 'No tienes permisos',
       404: 'Recurso no encontrado',
-      500: 'Error interno del servidor'
+      500: error.error?.message || 'Error interno del servidor'
     };
 
     return messages[error.status] || error.error?.message || 'Error desconocido';
