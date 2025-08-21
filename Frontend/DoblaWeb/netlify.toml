@@ -1,6 +1,6 @@
 [build]
 base = "Frontend/DoblaWeb"
-publish = "dist/DoblaWeb/browser"  
+publish = "dist/dobla-web/browser"  
 command = "ng build --configuration=production"
 
 [[redirects]]
