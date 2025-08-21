@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    title= title || 'Solicitud aprobada'
+    style.
+      body {
+        font-family: sans-serif;
+        background-color: #f4f4f4;
+        padding: 40px;
+        text-align: center;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 6px;
+        max-width: 500px;
+        margin: 0 auto;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+  body
+    .container
+      h1 ✅ ¡Solicitud Aprobada!
+      p= message
+      p Código enviado: 
+        strong #{code}

@@ -1,45 +1,114 @@
+/* admin-header.component.css */
 .simple-header {
-  height: 10vh;           /* 10% del alto de la pantalla */
-  min-height: 70px;       /* Altura mínima */
-  max-height: 140px;      /* Altura máxima */
+  height: 10vh;
+  min-height: 70px;
+  max-height: 140px;
   background-color: #2c3e50;
   color: #ecf0f1;
   display: flex;
-  align-items: center;    /* Centrado vertical */
-  justify-content: space-between; /* Distribuye espacio entre elementos */
-align-content: center; /* Alinea contenido en el centro */
-  padding: 0 30px;        /* Espacio interno */
-  box-sizing: border-box; /* Incluye padding en dimensiones */
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  box-sizing: border-box;
   position: relative;
-  border: 8px solid #1c4aa6;         /* Necesario para posicionar logo */
+  border: 8px solid #1c4aa6;
+  z-index: 100;
 }
 
-/* Foto de perfil (izquierda) */
-.profile-container img {
-  height: 50px;
-  width: 50px;           /* Fijo para que sea cuadrado */
-  border-radius: 50%;     /* Circular */
-  object-fit: cover;      /* Ajuste para fotos */
+/* Contenedor y botón de Cerrar Sesión (IZQUIERDA) */
+.logout-container {
+  display: flex;
+  align-items: center;
 }
 
-/* Logo (centro) */
+.logout-btn {
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  width: 100px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ecf0f1;
+  position: relative;
+  padding: 5px 0;
+}
+
+.logout-btn:hover{
+  color:#e74c3c;
+}
+.logout-btn a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #e74c3c;
+  transition: width 0.3s ease;
+}
+
+.logout-btn a:hover::after {
+  width: 90%; 
+}
+
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Logo de texto centrado */
 .logo-container {
-  position: absolute;     /* Posicionamiento absoluto */
-  left: 50%;             /* Centrado horizontal */
-  transform: translateX(-50%); /* Ajuste fino del centrado */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  z-index: 100;
 }
 
-.logo-container img {
-  height: 50px;
-  width: auto;
-  object-fit: contain;    /* Ideal para logos */
+.logo-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ecf0f1;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  padding: 5px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Menú (derecha) */
+.logo-text::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #ecf0f1;
+  transition: width 0.3s ease;
+}
+
+.logo-container:hover .logo-text::after {
+  width: 100%;
+}
+
+.logo-container:hover {
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* Menú de navegación (DERECHA) */
 .simple-nav {
   list-style: none;
   display: flex;
   gap: 2rem;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
 }
 
 .simple-nav a {
@@ -47,14 +116,31 @@ align-content: center; /* Alinea contenido en el centro */
   text-decoration: none;
   font-weight: 500;
   font-size: 1rem;
-  transition: color 0.2s;
+  transition: all 0.3s ease;
+  padding: 5px 0;
+  position: relative;
 }
 
 .simple-nav a:hover {
   color: #e74c3c;
 }
 
-/* 🔥 Responsive (Móviles) */
+.simple-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #e74c3c;
+  transition: width 0.3s ease;
+}
+
+.simple-nav a:hover::after {
+  width: 100%;
+}
+
+/* 🔥 Responsive (Móviles) - Mejorado */
 @media (max-width: 768px) {
   .simple-header {
     height: auto;
@@ -63,21 +149,33 @@ align-content: center; /* Alinea contenido en el centro */
     flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
+    position: relative;
+    z-index: 100;
+  }
+
+  .logout-container {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
   }
 
   .logo-container {
-    position: static;    /* Quita el posicionamiento absoluto */
+    position: static;
     transform: none;
-    order: 1;           /* Logo arriba */
+    order: 2;
+    margin: 10px 0;
+    text-align: center;
   }
 
-  .profile-container {
-    order: 2;           /* Foto después del logo */
+  .logo-text {
+    font-size: 1.8rem;
   }
 
   nav {
-    order: 3;           /* Menú al final */
+    order: 3;
     width: 100%;
+    margin-top: 15px;
   }
 
   .simple-nav {
@@ -85,10 +183,20 @@ align-content: center; /* Alinea contenido en el centro */
     flex-wrap: wrap;
     gap: 1rem 2rem;
   }
-
-  .profile-container img,
-  .logo-container img {
-    height: 40px;
-    width: 40px;        /* Ajuste para móviles */
+  
+  /* Ajustes adicionales para móviles pequeños */
+  @media (max-width: 480px) {
+    .simple-nav {
+      gap: 0.8rem 1.5rem;
+    }
+    
+    .logo-text {
+      font-size: 1.5rem;
+    }
+    
+    .logout-btn {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
   }
 }

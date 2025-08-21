@@ -1,20 +1,28 @@
 <!-- Modal que aparece al inicio -->
 <div *ngIf="mostrarModal" class="modal-overlay">
-  <div class="modal-container">
-    <div class="modal-content">
-      
-      <p>La página DoblaWeb es la única página oficial de Doblaceros y Laminados Tihuatlan diseñada para</p>
-      <ul>
-        <li>Brindar información sobre la empresa</li>
-        <li>Mostrar nuestros productos</li>
-        <li>Proporcionar datos de contacto actualizados y verificados</li>
+  <div
+    class="modal-container"
+    style="display: flex; justify-content: center; align-items: center"
+  >
+    <div class="modal-content" style="font-size: 1.4rem; text-align: center">
+      <div>
+        <p>
+          La página DoblaWeb es la única página oficial de Doblaceros y
+          Laminados Tihuatlan diseñada para
+        </p>
+        <ul style="list-style-position: inside; padding-left: 0">
+          <li>Brindar información sobre la empresa</li>
+          <li>Mostrar nuestros productos</li>
+          <li>Proporcionar datos de contacto actualizados y verificados</li>
         </ul>
-        <h4>Aviso importante:</h4>
+        <h4 style="font-size: 1.6rem">Aviso importante:</h4>
         <p>Este sitio exclusivamente informativo. No realizamos:</p>
-        <ul>
+        <ul style="list-style-position: inside; padding-left: 0">
           <li>Ventas en línea</li>
           <li>Compras en línea</li>
         </ul>
+      </div>
+
       <button (click)="cerrarModal()" class="close-button">x</button>
     </div>
   </div>
@@ -22,11 +30,188 @@
 
 <!-- Resto del contenido normal de tu página -->
 <div *ngIf="!mostrarModal">
-   <div class="content-wrapper">
-    <img src="assets/logo.png" alt="Logo DoblaWeb" class="centered-image">
-    <div class="auth-buttons">
-      <button class="auth-button register-button">Registrar</button>
-      <button class="auth-button login-button">Iniciar Sesión</button>
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Excelencia en transformación de acero</h1>
+      <p class="hero-subtitle">Desde 1995 en Tihuatlán, Veracruz</p>
     </div>
-  </div>
+  </section>
+
+  <!-- Sobre Nosotros -->
+  <section class="about-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Nuestra Empresa</h2>
+        <div class="divider"></div>
+      </div>
+
+      <div class="about-content">
+        <div class="about-text">
+          <p>
+            <strong>Doblaceros y Laminados Tihuatlán S.A. de C.V.</strong> es
+            una empresa mexicana con más de 28 años de experiencia especializada
+            en la transformación de acero. Ubicados estratégicamente en
+            Tihuatlán, Veracruz, hemos crecido hasta convertirnos en referentes
+            regionales en la fabricación de:
+          </p>
+
+          <ul class="custom-list">
+            <li>Láminas galvanizadas y roladas</li>
+            <li>Perfiles estructurales</li>
+            <li>Productos metálicos para construcción</li>
+            <li>Piezas especiales por maquila</li>
+          </ul>
+
+          <div class="company-stats">
+            <div class="stat-item">
+              <span class="stat-number">3,500 m²</span>
+              <span class="stat-label">de instalaciones</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">500+</span>
+              <span class="stat-label">clientes satisfechos</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">28</span>
+              <span class="stat-label">años de experiencia</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-image">
+          <img
+            src="planta-tihuatlan.jpg"
+            alt="Planta de producción en Tihuatlán"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Línea de Producción -->
+  <section class="production-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Nuestros Procesos</h2>
+        <div class="divider"></div>
+        <p class="section-description">Tecnología y precisión en cada etapa</p>
+      </div>
+
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-number">1</div>
+          <h3>Recepción de materia prima</h3>
+          <p>Acero de la más alta calidad de proveedores certificados</p>
+        </div>
+
+        <div class="process-step">
+          <div class="step-number">2</div>
+          <h3>Corte y dimensionado</h3>
+          <p>Equipos CNC para máxima precisión en medidas</p>
+        </div>
+
+        <div class="process-step">
+          <div class="step-number">3</div>
+          <h3>Doblado y rolado</h3>
+          <p>Maquinaria hidráulica para formas perfectas</p>
+        </div>
+
+        <div class="process-step">
+          <div class="step-number">4</div>
+          <h3>Acabados y control de calidad</h3>
+          <p>Inspección rigurosa antes de entrega</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Productos Destacados -->
+  <section class="products-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Nuestros Productos</h2>
+        <div class="divider"></div>
+      </div>
+
+      <div class="product-cards">
+        <div class="product-card">
+          <div class="product-image">
+            <img src="https://th.bing.com/th/id/OIP.wv7K34xCTnSapl9Zk5RMbwHaHa?w=160&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Lámina galvanizada">
+          </div>
+          <div class="product-info">
+            <h3>Lámina Galvanizada</h3>
+            <ul>
+              <li>Calibre 16 al 24</li>
+              <li>Anchos estándar y especiales</li>
+              <li>Protección G-90</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-image">
+<img src="https://scontent.fmex19-1.fna.fbcdn.net/v/t1.6435-9/117336941_1130818610651608_1461292146039324974_n.jpg?stp=c120.0.720.720a_dst-jpg_s206x206_tt6&_nc_cat=105&ccb=1-7&_nc_sid=50ad20&_nc_eui2=AeF0EqpdLzoJcn25pX8hhj2ogC3BYYtVSYGALcFhi1VJgTPujF3WiJrYjgeCIB7iR1rIbFLwhebgRbqvatrxM_Yf&_nc_ohc=8uwY-8xqKLUQ7kNvwEHG3uT&_nc_oc=AdlV90XN9XNdzsAiOU-IkxQj9-WpHiypjMa00j1X8Mlch2yh2uE3JWyIqvB8uuN1Q-Xtyq7TU-oDLszw5m9biUNe&_nc_zt=23&_nc_ht=scontent.fmex19-1.fna&_nc_gid=xVmEW8z3aPY73xrVkF6q9w&oh=00_AfVAseaeh5B3bDLExooIfQ1i7xoidYiIs63guT-tEE0O_g&oe=68CC2E95" alt="Perfiles estructurales">
+          </div>
+          <div class="product-info">
+            <h3>Perfiles Estructurales</h3>
+            <ul>
+              <li>Angulares</li>
+              <li>Canales</li>
+              <li>Soleras</li>
+              <li>Medidas estándar y bajo plano</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-image">
+            <img src="https://th.bing.com/th/id/OIP.VblvKQiFzxBy7491JPMilAHaEI?w=276&h=180&c=7&r=0&o=5&pid=1.7" alt="Maquila especial">
+          </div>
+          <div class="product-info">
+            <h3>Maquila Especial</h3>
+            <ul>
+              <li>Piezas personalizadas</li>
+              <li>Trabajos bajo plano</li>
+              <li>Corte, doblado y soldadura</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compromiso -->
+  <section class="commitment-section">
+    <div class="section-container">
+      <div class="commitment-content">
+        <h2>Nuestro Compromiso</h2>
+        <div class="divider light"></div>
+        <p class="commitment-text">
+          En Doblaceros y Laminados Tihuatlán nos comprometemos a entregar
+          productos de la más alta calidad, cumpliendo con los estándares de la
+          industria y superando las expectativas de nuestros clientes a través
+          de:
+        </p>
+
+        <div class="commitment-points">
+          <div class="commitment-point">
+            <i class="fas fa-check-circle"></i>
+            <span>Materias primas de calidad certificada</span>
+          </div>
+          <div class="commitment-point">
+            <i class="fas fa-check-circle"></i>
+            <span>Procesos estandarizados y controlados</span>
+          </div>
+          <div class="commitment-point">
+            <i class="fas fa-check-circle"></i>
+            <span>Personal técnico capacitado</span>
+          </div>
+          <div class="commitment-point">
+            <i class="fas fa-check-circle"></i>
+            <span>Entrega oportuna</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>

@@ -1,1 +1,54 @@
-<p>productos works!</p>
+<div class="productos-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1 class="header-title">Nuestros Productos</h1>
+    <p class="header-subtitle">Descubre nuestra selección de productos de calidad</p>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner-border spinner-large text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">Cargando productos...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="alert alert-danger alert-dismissible fade show error-state" role="alert">
+    <strong>Error:</strong> {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Product grid -->
+  <div class="products-grid" *ngIf="!loading && !error && products.length > 0">
+    <div *ngFor="let product of products" class="product-card">
+      <!-- Product image -->
+      <div class="image-container">
+        <img [src]="getImageUrl(product)" 
+             [alt]="product.name"
+             class="product-image"
+             (error)="handleImageError($event, product)"
+             loading="lazy">
+      </div>
+
+      <div class="card-content">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-description">
+          {{ (product.description || 'Sin descripción') | slice:0:120 }}{{ product.description && product.description.length > 120 ? '...' : '' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !error && products.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-box-open"></i>
+    </div>
+    <h4 class="empty-title">No hay productos disponibles</h4>
+    <p class="empty-subtitle">Estamos trabajando para traerte las mejores opciones</p>
+    <button class="btn btn-primary mt-2" (click)="loadProducts()">
+      Reintentar
+    </button>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="login-container">
+  <!-- Sección izquierda (ahora con el contenido de login) -->
+  <div class="login-content">
+    <button class="back-button" routerLink="/">Regresar</button>
+    <h2>Crear cuenta como:</h2>
+    <div class="role-options">
+      <button routerLink="/home">CLIENTE</button>
+      <button (click)="openEmployeeModal()">EMPLEADO</button>
+    </div>
+  </div>
+
+  <!-- Modal para empleados -->
+  <div *ngIf="showEmployeeModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Registro de Empleado</h3>
+      <p>Ingresa tu correo para solicitar un código de verificación:</p>
+      <input [(ngModel)]="employeeEmail" placeholder="tucorreo@example.com">
+      <div class="modal-buttons">
+        <!-- Usar sendVerificationRequest() -->
+        <button (click)="sendVerificationRequest()" [disabled]="isLoading">
+          {{ isLoading ? 'Enviando...' : 'Solicitar Código' }}
+        </button>
+        <button (click)="closeModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
+
+  <!-- Sección derecha (ahora con la imagen) -->
+  <div class="login-image">
+    
+  </div>
+</div>

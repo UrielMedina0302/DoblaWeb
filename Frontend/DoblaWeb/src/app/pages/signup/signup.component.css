@@ -1,0 +1,322 @@
+/* signup-layout.component.css */
+/* Contenedor principal */
+.signup-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  padding: 0; 
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  gap: 0; 
+}
+
+/* Sección de imagen */
+.signup-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; 
+  overflow: hidden;
+  background-color: #f8f9fa; 
+  margin: 20px 10px 0 0;
+  max-height: 95vh;
+  
+  background: url("https://www.cdl.es/wp-content/uploads/cdl-hierro-acero-perfiles-laminados-frio-omega.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Sección de contenido (izquierda) */
+.signup-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  background: white;
+  border-radius: 10px;
+  padding: 60px 40px;
+  margin: 20px 10px 0 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+  max-height: 95vh;
+  height: 75%;
+}
+
+/* Botón Regresar */
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #6c757d;
+  transition: all 0.2s;
+  padding: 5px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  &:hover {
+    color: #4285f4;
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+h2 {
+  margin: 0 0 30px 0;
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  position: relative;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: #4285f4;
+    border-radius: 3px;
+  }
+}
+
+/* Formulario */
+.signup-form {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+
+  .form-group {
+    margin-bottom: 10px;
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #495057;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input {
+      width: 92%;
+      padding: 14px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background-color: #f9f9f9;
+
+      &:focus {
+        border-color: #4285f4;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        background-color: white;
+      }
+
+      &::placeholder {
+        color: #aaa;
+      }
+    }
+  }
+
+  .signup-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background-color: #3367d6;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Enlace de login */
+.login-link {
+  text-align: center;
+  font-size: 14px;
+  color: #6c757d;
+  margin-top: 20px;
+
+  a {
+    color: #4285f4;
+    font-weight: 500;
+    text-decoration: none;
+    margin-left: 5px;
+    transition: all 0.2s;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Estilos para el modal de verificación */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+
+  h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #5a6a85;
+    margin-bottom: 1.5rem;
+  }
+
+  input {
+    width: 93%;
+    padding: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e0e4e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+
+    &:focus {
+      border-color: #4285f4;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+    }
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: #3367d6;
+    }
+
+    &[disabled] {
+      background-color: #a0bff8;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .signup-container {
+    grid-template-columns: 1fr;
+    padding: 0;
+
+    .signup-image {
+      order: -1;
+      padding: 20px 20px 0 20px;
+      
+      img {
+        width: 80%;
+        height: 40vh; /* Altura fija para tablets */
+        object-fit: cover;
+      }
+    }
+
+    .signup-content {
+      margin: 20px;
+      padding: 50px 30px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .signup-container {
+    .signup-image {
+      padding: 15px 15px 0 15px;
+      
+      img {
+        width: 90%;
+        height: 35vh; /* Altura menor para móviles */
+      }
+    }
+    
+    .signup-content {
+      margin: 15px;
+      padding: 40px 20px;
+      
+      h2 {
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .signup-form {
+        .form-group input {
+          padding: 12px 10px;
+        }
+
+        .signup-button {
+          padding: 12px;
+        }
+      }
+    }
+  }
+  
+  .social-buttons {
+    flex-direction: column;
+  }
+}
+
+/*error message*/
+.error-message {
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+  text-align: center;
+}

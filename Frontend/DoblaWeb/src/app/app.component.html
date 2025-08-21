@@ -1,6 +1,16 @@
- <app-header></app-header> 
-<!-- <app-header-admin></app-header-admin> -->
-<app-body></app-body>
-<app-footer1 *ngIf="auth.isLoggedIn()"></app-footer1>
+@if (showMainHeader) {
+  <app-header />
+}
+@if (showHeaderClient) {
+  <app-header-client />
+}
+@if (showHeaderAdmin) {
+  <app-header-admin />
+}
 
+<!-- Aquí va tu componente body que contiene SU PROPIO router-outlet -->
+<app-body />
 
+@if (showFooter) {
+  <app-footer1 />
+}

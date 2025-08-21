@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "clean": "rd /s /q node_modules\\.cache && npm cache clean --force",
+    "reset": "npm run clean && rd /s /q node_modules && npm install"
   },
   "keywords": [],
   "author": "",
@@ -14,12 +17,30 @@
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.0.1",
     "helmet": "^8.1.0",
+    "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.1"
+    "mongoose": "^8.16.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.5",
+    "path-to-regexp": "^6.3.0",
+    "pug": "^3.0.3"
+  },
+  "nodemonConfig": {
+    "delay": 1500,
+    "watch": [
+      "src/"
+    ],
+    "ignore": [
+      "src/**/*.spec.js"
+    ],
+    "verbose": true,
+    "exec": "node --trace-warnings"
   },
   "devDependencies": {
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.10"
   }
 }
