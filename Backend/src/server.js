@@ -21,7 +21,7 @@ app.set('port', process.env.PORT || 3000);
 
 // Middlewares
 app.use(cors({
-  origin: 'https://doblaweb.netlify.app/',
+  origin: 'https://doblaweb.netlify.app',
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'x-user-data','X-Request-Source','X-Bypass-Interceptor', 'x-user-id', 'x-user-role'],
   exposedHeaders: ['Content-Disposition']
