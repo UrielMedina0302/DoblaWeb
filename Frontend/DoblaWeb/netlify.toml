@@ -1,0 +1,8 @@
+[build]
+  base = "Frontend/Doblaweb"
+  publish = "dist/dobla-web/browser"  
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

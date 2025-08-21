@@ -5,10 +5,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:DoblaWeb": "node dist/dobla-web/server/server.mjs"
+    "serve:ssr:DoblaWeb": "node dist/dobla-web/server/server.mjs",
+    "build": "ng build --configuration=production --prerender=false",
+    "build:netlify": "ng build --configuration=production --prerender=false --optimization=true"
   },
   "private": true,
   "dependencies": {
@@ -44,6 +45,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "multer": "^2.0.2",
+    "purgecss": "^7.0.2",
     "typescript": "~5.7.2"
   }
 }
