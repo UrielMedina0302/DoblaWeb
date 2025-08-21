@@ -4,7 +4,10 @@ const publicRoutes = [
   { method: 'POST', path: '/api/auth/forgotPassword' },
   { method: 'POST', path: '/api/auth/login' },
   { method: 'POST', path: '/api/auth/signup' },
-  { method: 'PATCH', path: /^\/api\/auth\/resetPassword\/.+/ }
+  { method: 'PATCH', path: /^\/api\/auth\/resetPassword\/.+/ },
+   { method: 'POST', path: '/api/auth/request-employee-code' },
+  { method: 'GET', path: '/api/auth/approve-employee-code' },
+  { method: 'POST', path: '/api/auth/verify-employee-code' }
 ];
 exports.authenticate = async (req, res, next) => {
   // Verifica si es ruta pública

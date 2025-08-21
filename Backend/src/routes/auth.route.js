@@ -10,7 +10,7 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 
 //Rutas para el manejo de códigos de empleado
 router.post('/request-employee-code', authController.requestEmployeeCode); 
-router.post('/approve-employee-code', authController.approveEmployeeCode);
+router.get('/approve-employee-code', authController.approveEmployeeCode);
 router.post('/verify-employee-code', authController.verifyEmployeeCode);
 
 // Ruta protegida 

@@ -330,35 +330,28 @@ exports.requestEmployeeCode = async (req, res) => {
 // ✅ Paso 2: El administrador aprueba la solicitud
 exports.approveEmployeeCode = async (req, res) => {
   const { email, code } = req.query;
-
   if (!email || !code) return res.status(400).send("Parámetros faltantes");
 
   const storedData = employeeCodes.get(email);
-
   if (!storedData || storedData.code !== code || storedData.expiresAt < Date.now()) {
     return res.status(400).send("Código inválido o expirado");
   }
 
   try {
-    // Enviar correo pero no bloquear render
-    try {
-      await new sendEmail({ email, name: "Empleado" }).sendEmployeeCodeConfirmation(code);
-    } catch (err) {
-      console.error("❌ Error enviando correo:", err);
-    }
+    // enviar correo al empleado
+    await new sendEmail({ email, name: "Empleado" }).sendEmployeeCodeConfirmation(code);
+    //employeeCodes.delete(email);
 
-    employeeCodes.delete(email);
-
-    return res.render("approvalSuccess", {
+    // renderizar éxito
+    return res.render('approvalSuccess', {
       email,
       code,
       title: "Solicitud aprobada",
-      message: `El código ha sido enviado exitosamente al empleado: ${email}`
+      message: `El código ha sido enviado exitosamente al usuario con el correo: ${email}`
     });
-
-  } catch (error) {
-    console.error("❌ Error interno:", error);
-    return res.status(500).send("Error interno al procesar solicitud");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Error interno");
   }
 };
 

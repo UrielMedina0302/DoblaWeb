@@ -3,11 +3,11 @@ html
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title Tu Código de Registro - DoblaWeb
+    title= title
     style.
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f6f8;
+        background-color: #2c3e50;
         margin: 0;
         padding: 0;
         display: flex;
@@ -26,25 +26,39 @@ html
         color: #2c3e50;
       }
       h2 {
-        color: #2c3e50;
         margin-bottom: 20px;
+        color: #2c3e50;
       }
       p {
         line-height: 1.5;
         margin-bottom: 15px;
       }
-      h3 {
+      ul {
+        list-style: none;
+        padding: 0;
+        text-align: center;
+      }
+      li {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      strong {
         color: #2c3e50;
-        font-size: 24px;
-        background-color: #ecf0f1;
-        padding: 10px 20px;
-        border-radius: 8px;
+      }
+      .code {
         display: inline-block;
+        background-color: #ecf0f1;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 20px;
+        margin-top: 10px;
       }
   body
     .container
-      h2 ¡Solicitud aprobada!
-      p Hola #{firstName}, tu solicitud ha sido aprobada.
-      p Aquí tienes tu código de registro:
-      h3 #{code}
-      p Este código expira en 15 minutos.
+      h2= title
+      p= message
+      ul
+        li
+          strong Código:
+          span.code #{code}

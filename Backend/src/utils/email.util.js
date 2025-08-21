@@ -50,13 +50,14 @@ module.exports = class Email {
   }
 
   // Renderizado de plantillas con caché
-  async renderTemplate(template) {
+  async renderTemplate(template, data = {}) {
     try {
       const templatePath = path.join(__dirname, `../views/emails/${template}.pug`);
       
       // Datos base que estarán disponibles en todas las plantillas
       const templateContext = {
         ...this.templateData,
+        ...data,
         url: this.url,
         appName: 'DoblaWeb',
         currentYear: new Date().getFullYear(),

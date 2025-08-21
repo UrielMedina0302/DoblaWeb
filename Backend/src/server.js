@@ -79,6 +79,10 @@ app.use('*', (req, res) => {
   });
 });
 
+// Configuración Pug
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
 app.listen(app.get('port'), () => {
   console.log(`Server running on port ${app.get('port')}`);
 });
