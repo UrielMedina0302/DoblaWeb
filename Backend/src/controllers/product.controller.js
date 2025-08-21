@@ -43,7 +43,7 @@ exports.createProduct = async (req, res, next) => {
         filename: file.filename,
         originalname: file.originalname,
         path: file.path,
-        url: `${req.protocol}://${req.get('host')}/api/product/image/${file.filename}`,
+        url: `${baseUrl}/api/product/image/${file.filename}`,
         size: file.size,
         mimetype: file.mimetype
       }));
@@ -94,7 +94,7 @@ exports.updateProduct = async (req, res, next) => {
             filename: file.filename,
             originalname: file.originalname,
             path: file.path,
-            url: `${req.protocol}://${req.get('host')}/api/product/image/${file.filename}`,
+            url: `${baseUrl}/api/product/image/${file.filename}`,
             size: file.size,
             mimetype: file.mimetype
           }));

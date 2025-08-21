@@ -181,7 +181,7 @@ exports.forgotPassword = async (req, res, next) => {
     console.log("[FORGOT_PASSWORD] Token guardado en BD para:", user.email);
 
     // Enviar email
-    const frontendResetURL = `http://localhost:4200/reset-password?token=${resetToken}`;
+    const frontendResetURL = `https://doblaweb.netlify.appreset-password?token=${resetToken}`;
     await new sendEmail(user, frontendResetURL).sendPasswordReset();
 
     res.status(200).json({
