@@ -1,6 +1,7 @@
 [build]
-  base = "Frontend/Doblaweb"
-  publish = "dist/dobla-web/browser"  
+base = "Frontend/DoblaWeb"
+publish = "dist/DoblaWeb/browser"  
+command = "ng build --configuration=production"
 
 [[redirects]]
   from = "/*"
