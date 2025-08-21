@@ -1,10 +1,14 @@
 services:
   - type: web
-    name: backend-doblaweb
-    runtime: node
-    buildCommand: "cd Backend && npm install"
-    startCommand: "cd Backend && npm start"
-    root: Backend
+    name: dobla-api
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
     envVars:
-      - key: PORT
-        value: "10000"
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false

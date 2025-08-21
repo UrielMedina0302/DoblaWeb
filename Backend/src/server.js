@@ -61,7 +61,9 @@ const authRouter = require('./routes/auth.route');
 app.use('/api/product', productRouter);
 app.use('/api/user', userRouter);
 app.use('/api/auth', limiter, authRouter);
-
+app.get('/', (req, res) => {
+  res.send('🚀 API de DoblaWeb funcionando correctamente');
+});
 // Error handler middleware
 app.use((err, req, res, next) => {
   console.error('Error global:', err);
