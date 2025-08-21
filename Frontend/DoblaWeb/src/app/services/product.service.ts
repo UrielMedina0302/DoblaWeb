@@ -25,17 +25,24 @@ export class ProductService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   // ----------- PRODUCTOS PÚBLICOS ------------
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl).pipe(
-      map((response: any) => {
-        const products = response.data || response;
-        return Array.isArray(products)
-          ? products.map(p => this.transformProduct(p))
-          : [];
-      }),
-      catchError(error => this.handleReadError(error))
-    );
-  }
+  // product.service.ts - CORRECCIÓN DEL MÉTODO getProducts()
+getProducts(): Observable<Product[]> {
+  return this.http.get<any>(this.apiUrl).pipe(
+    map((response: any) => {
+      // El backend devuelve { success: true, data: [...] }
+      const products = response.data || response;
+      
+      // Asegurarse de que es un array
+      if (!Array.isArray(products)) {
+        console.warn('La respuesta del servidor no es un array:', response);
+        return [];
+      }
+      
+      return products.map(p => this.transformProduct(p));
+    }),
+    catchError(error => this.handleReadError(error))
+  );
+}
 
   getActiveProducts(): Observable<Product[]> {
     return this.getProducts().pipe(
@@ -78,6 +85,27 @@ export class ProductService {
     );
   }
 
+  // product.service.ts - AGREGA ESTE MÉTODO PÚBLICO
+getProductImageUrl(imageInfo: any): string {
+  if (!imageInfo) return 'assets/images/placeholder-product.jpg';
+  
+  // Si es un string
+  if (typeof imageInfo === 'string') {
+    return this.getFullImageUrl(imageInfo);
+  }
+  
+  // Si es un objeto con url
+  if (imageInfo.url) {
+    return this.getFullImageUrl(imageInfo.url);
+  }
+  
+  // Si es un objeto con filename
+  if (imageInfo.filename) {
+    return this.getFullImageUrl(`/api/product/image/${imageInfo.filename}`);
+  }
+  
+  return 'assets/images/placeholder-product.jpg';
+}
   // ----------- TRANSFORM / UTILS ------------
   private transformProduct(product: any): Product {
     return {
@@ -92,19 +120,70 @@ export class ProductService {
     };
   }
 
-  private transformImages(images: any): any[] {
-    if (!images) return [];
-    return (Array.isArray(images) ? images : [images]).map(img => {
-      if (typeof img === 'object' && (img.url || img.filename)) return img;
-      if (typeof img === 'string') {
-        return {
-          filename: img.split('/').pop(),
-          url: img.startsWith('http') ? img : `${environment.apiUrl}/${img.replace(/^\/+/, '')}`
-        };
-      }
-      return { url: 'assets/default-product.png' };
-    });
+  // product.service.ts - MEJORA transformImages()
+private transformImages(images: any): any[] {
+  if (!images) return [];
+  
+  const imageArray = Array.isArray(images) ? images : [images];
+  
+  return imageArray.map(img => {
+    // Si ya es un objeto con URL válida
+    if (typeof img === 'object' && img.url) {
+      return {
+        filename: img.filename || img.url.split('/').pop(),
+        url: this.getFullImageUrl(img.url),
+        originalname: img.originalname,
+        size: img.size,
+        mimetype: img.mimetype
+      };
+    }
+    
+    // Si es un objeto con filename
+    if (typeof img === 'object' && img.filename) {
+      return {
+        filename: img.filename,
+        url: this.getFullImageUrl(`/api/product/image/${img.filename}`),
+        originalname: img.originalname,
+        size: img.size,
+        mimetype: img.mimetype
+      };
+    }
+    
+    // Si es un string (filename o URL)
+    if (typeof img === 'string') {
+      return {
+        filename: img.split('/').pop(),
+        url: this.getFullImageUrl(img),
+        originalname: img
+      };
+    }
+    
+    // Default
+    return {
+      filename: 'default.jpg',
+      url: 'assets/images/placeholder-product.jpg',
+      originalname: 'Imagen no disponible'
+    };
+  });
+}
+
+// Método auxiliar para construir URLs completas de imágenes
+private getFullImageUrl(urlOrPath: string): string {
+  if (!urlOrPath) return 'assets/images/placeholder-product.jpg';
+  
+  // Si ya es una URL completa
+  if (urlOrPath.startsWith('http')) {
+    return urlOrPath;
   }
+  
+  // Si es una ruta relativa que comienza con /
+  if (urlOrPath.startsWith('/')) {
+    return `${environment.apiUrl}${urlOrPath}`;
+  }
+  
+  // Si es solo un filename
+  return `${environment.apiUrl}/product/image/${urlOrPath}`;
+}
 
   private getAuthHeaders(forFormData: boolean = false): HttpHeaders {
     let headers = new HttpHeaders();
